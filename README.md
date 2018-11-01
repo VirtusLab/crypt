@@ -53,4 +53,4 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
 
 ## The name
 
-We believe in obvious names. It encrypts and decrypts. It's a *verb*, `crypt`.
+We believe in obvious names. It encrypts and decrypts.
