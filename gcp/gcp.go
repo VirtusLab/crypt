@@ -9,18 +9,16 @@ const (
 	Key       = "key"
 )
 
-type GCP struct{}
+type GoogleKMS struct{}
 
-func NewGCP() *GCP {
-	return &GCP{}
+func NewGoogleKMS() *GoogleKMS {
+	return &GoogleKMS{}
 }
 
-// https://cloud.google.com/kms/docs/quickstart
-// https://cloud.google.com/kms/docs/encrypt-decrypt#kms-howto-encrypt-go
-func (g *GCP) Encrypt(inputPath, outputPath string, params map[string]interface{}) error {
-	return errors.New("NOT_IMPLEMENTED_YET")
+func (g *GoogleKMS) Encrypt(plaintext []byte, params map[string]interface{}) (error, []byte) {
+	return errors.New("NOT_IMPLEMENTED_YET"), nil
 }
 
-func (g *GCP) Decrypt(inputPath, outputPath string, params map[string]interface{}) error {
-	return errors.New("NOT_IMPLEMENTED_YET")
+func (g *GoogleKMS) Decrypt(ciphertext []byte, params map[string]interface{}) (error, []byte) {
+	return errors.New("NOT_IMPLEMENTED_YET"), nil
 }

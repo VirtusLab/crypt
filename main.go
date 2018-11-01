@@ -8,9 +8,8 @@ import (
 	"github.com/VirtusLab/crypt/constants"
 	"github.com/Sirupsen/logrus"
 	"github.com/VirtusLab/crypt/version"
-	"github.com/VirtusLab/crypt/azure"
-	"github.com/VirtusLab/crypt/aws"
 	"github.com/VirtusLab/crypt/gcp"
+	"github.com/VirtusLab/crypt/files"
 )
 
 var (
@@ -115,12 +114,7 @@ func encryptCommand() cli.Command {
 				Name:  "azure",
 				Usage: "Encrypts files and/or strings with Azure Key Vault",
 				Action: func(c *cli.Context) error {
-					azureCrypt := azure.NewAzure()
-					err := azureCrypt.Encrypt(inputPath, inputPath, nil)
-					if err != nil {
-						logrus.Debugf("Encrypting failed: %s", err)
-						return err
-					}
+					// TODO
 					return nil
 				},
 			},
@@ -128,12 +122,7 @@ func encryptCommand() cli.Command {
 				Name:  "aws",
 				Usage: "Encrypts files and/or strings with AWS KMS",
 				Action: func(c *cli.Context) error {
-					awsCrypt := aws.NewAWS()
-					err := awsCrypt.Encrypt(inputPath, inputPath, nil)
-					if err != nil {
-						logrus.Debugf("Encrypting failed: %s", err)
-						return err
-					}
+					// TODO
 					return nil
 				},
 			},
@@ -167,18 +156,29 @@ func encryptCommand() cli.Command {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					gcpCrypt := gcp.NewGCP()
+					googleKMS := gcp.NewGoogleKMS()
 					params := map[string]interface{}{
 						gcp.ProjectId: gcpProject,
 						gcp.Location:  gcpLocation,
 						gcp.KeyRing:   gcpKeyring,
 						gcp.Key:       gcpKey,
 					}
-					err := gcpCrypt.Encrypt(inputPath, inputPath, params)
+					input, err := files.ReadInput(inputPath)
+					if err != nil {
+						logrus.Debugf("Can't open plaintext file: %v", err)
+						return err
+					}
+					err, result := googleKMS.Encrypt(input, params)
 					if err != nil {
 						logrus.Debugf("Encrypting failed: %s", err)
 						return err
 					}
+					err = files.WriteOutput(outputPath, result, 0644)
+					if err != nil {
+						logrus.Debugf("Can't save the encrypted file: %v", err)
+						return err
+					}
+
 					return nil
 				},
 			},
@@ -210,25 +210,15 @@ func decryptCommand() cli.Command {
 				Name:  "azure",
 				Usage: "Decrypts files and/or strings with Azure Key Vault",
 				Action: func(c *cli.Context) error {
-					azureCrypt := azure.NewAzure()
-					err := azureCrypt.Decrypt(inputPath, inputPath, nil)
-					if err != nil {
-						logrus.Debugf("Decrypting failed: %s", err)
-						return err
-					}
+					// TODO
 					return nil
 				},
 			},
 			{
 				Name:  "aws",
-				Usage: "Decrypts files and/or strings with AWS KMS",
+				Usage: "Decrypts files and/or strings with AmazonKMS KMS",
 				Action: func(c *cli.Context) error {
-					awsCrypt := aws.NewAWS()
-					err := awsCrypt.Decrypt(inputPath, inputPath, nil)
-					if err != nil {
-						logrus.Debugf("Decrypting failed: %s", err)
-						return err
-					}
+					// TODO
 					return nil
 				},
 			},
@@ -262,16 +252,26 @@ func decryptCommand() cli.Command {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					gcpCrypt := gcp.NewGCP()
+					googleKMS := gcp.NewGoogleKMS()
 					params := map[string]interface{}{
 						gcp.ProjectId: gcpProject,
 						gcp.Location:  gcpLocation,
 						gcp.KeyRing:   gcpKeyring,
 						gcp.Key:       gcpKey,
 					}
-					err := gcpCrypt.Decrypt(inputPath, inputPath, params)
+					input, err := files.ReadInput(inputPath)
+					if err != nil {
+						logrus.Debugf("Can't open encrypted file: %v", err)
+						return err
+					}
+					err, result := googleKMS.Decrypt(input, params)
 					if err != nil {
 						logrus.Debugf("Decrypting failed: %s", err)
+						return err
+					}
+					err = files.WriteOutput(outputPath, result, 0644)
+					if err != nil {
+						logrus.Debugf("Can't save the decrypted file: %v", err)
 						return err
 					}
 					return nil

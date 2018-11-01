@@ -1,7 +1,8 @@
 package crypto
 
-type Crypt interface {
-	Encrypt(inputPath, outputPath string, params map[string]interface{}) error
-	Decrypt(inputPath, outputPath string, params map[string]interface{}) error
+// Key Management Service interface abstracts common cryptographic operations.
+type KMS interface {
+	Encrypt(plaintext []byte, params map[string]interface{}) (error, []byte)
+	Decrypt(ciphertext []byte, params map[string]interface{}) (error, []byte)
 }
 

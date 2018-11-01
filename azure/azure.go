@@ -2,16 +2,16 @@ package azure
 
 import "errors"
 
-type Azure struct{}
+type AzureKMS struct{}
 
-func NewAzure() *Azure {
-	return &Azure{}
+func NewAzureKMS() *AzureKMS {
+	return &AzureKMS{}
 }
 
-func (a *Azure) Encrypt(inputPath, outputPath string, params map[string]interface{}) error {
-	return errors.New("NOT_IMPLEMENTED_YET")
+func (a *AzureKMS) Encrypt(plaintext []byte, params map[string]interface{}) (error, []byte) {
+	return errors.New("NOT_IMPLEMENTED_YET"), nil
 }
 
-func (a *Azure) Decrypt(inputPath, outputPath string, params map[string]interface{}) error {
-	return errors.New("NOT_IMPLEMENTED_YET")
+func (a *AzureKMS) Decrypt(ciphertext []byte, params map[string]interface{}) (error, []byte) {
+	return errors.New("NOT_IMPLEMENTED_YET"), nil
 }
