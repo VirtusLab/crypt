@@ -1,4 +1,6 @@
 # Binaries for programs and plugins
+render
+testrender
 *.exe
 *.exe~
 *.dll
@@ -10,3 +12,14 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# Go coverage results
+coverage.txt
+profile.out
+
+# Temporary Files and Dependencies
+tmp
+cross
+
+# IDE
+.idea
