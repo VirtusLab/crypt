@@ -4,7 +4,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"errors"
 
 	"github.com/Sirupsen/logrus"
@@ -67,37 +66,3 @@ func WriteOutput(outputPath string, outputContent []byte, perm os.FileMode) erro
 	return nil
 }
 
-func IsNotEmptyAndExists(file string) bool {
-	if len(file) == 0 {
-		logrus.Infof("Configuration file path is empty")
-		return false
-	}
-
-	fileInfo, err := os.Stat(file)
-	if err != nil {
-		logrus.Infof("Configuration file path does not exist")
-		return false
-	}
-
-	if fileInfo.Size() == 0 {
-		logrus.Infof("Configuration file is empty")
-		return false
-	}
-
-	return true
-}
-
-func ToAbsPath(path, root string) (string, error) {
-	if filepath.IsAbs(path) {
-		return path, nil
-	}
-	return filepath.Join(root, path), nil
-}
-
-func Pwd() (string, error) {
-	dir, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	return dir, nil
-}
