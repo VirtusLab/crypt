@@ -1,6 +1,5 @@
 # Binaries for programs and plugins
-render
-testrender
+crypt
 *.exe
 *.exe~
 *.dll
