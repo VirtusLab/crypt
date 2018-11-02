@@ -1,12 +1,12 @@
 package files
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
 	"os"
-	"errors"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -65,4 +65,3 @@ func WriteOutput(outputPath string, outputContent []byte, perm os.FileMode) erro
 	}
 	return nil
 }
-

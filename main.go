@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"gopkg.in/urfave/cli.v1"
-	"github.com/Sirupsen/logrus"
 	"github.com/VirtusLab/crypt/aws"
 	"github.com/VirtusLab/crypt/azure"
 	"github.com/VirtusLab/crypt/constants"
 	"github.com/VirtusLab/crypt/crypto"
 	"github.com/VirtusLab/crypt/gcp"
 	"github.com/VirtusLab/crypt/version"
+	"github.com/sirupsen/logrus"
+	"gopkg.in/urfave/cli.v1"
 )
 
 var (

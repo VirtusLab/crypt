@@ -1,8 +1,8 @@
 package crypto
 
 import (
-	"github.com/Sirupsen/logrus"
 	"github.com/VirtusLab/crypt/files"
+	"github.com/sirupsen/logrus"
 )
 
 type Crypt struct {

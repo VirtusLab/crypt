@@ -1,14 +1,14 @@
 package gcp
 
 import (
-	"fmt"
-	"encoding/base64"
 	"context"
+	"encoding/base64"
+	"fmt"
 
-	"google.golang.org/api/cloudkms/v1"
-	"golang.org/x/oauth2/google"
-	"github.com/Sirupsen/logrus"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/cloudkms/v1"
 )
 
 const (
