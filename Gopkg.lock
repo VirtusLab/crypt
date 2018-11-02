@@ -26,6 +26,12 @@
   version = "v1.0.1"
 
 [[projects]]
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
+  version = "v0.8.0"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
@@ -98,6 +104,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "23971ca3238c78ec9b4fbdb81520b09940c9e59e9160694129d11db90ccaa551"
+  inputs-digest = "35fb332a8f2c13085bf99b5777a2332594f2acc530b772a9226bdfcefe6a9b06"
   solver-name = "gps-cdcl"
   solver-version = 1
