@@ -26,7 +26,23 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
        --help, -h     show help
        --version, -v  print the version
 
-### Encrypting with GCP KMS
+### Encrypting/Decrypting with GCP KMS
+
+Set up Cloud KMS and corresponding service account
+
+    $ gcloud init
+    $ gcloud kms keyrings create test --location global
+    $ gcloud kms keys create quickstart --location global --keyring test --purpose encryption
+    $ gcloud kms keys list --location global --keyring test
+    $ export GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
+
+Encryption and decryption example
+
+    $ echo "top secret" > file.txt
+    $ crypt en gcp --in file.txt --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
+    $ crypt de gcp --in file.enc --out file.dec --project lunar-compiler-123456 --location global --keyring test --key quickstart
+
+For more details run `crypt en gcp --help` or `crypt de gcp --help`
 
     NAME:
        crypt encrypt gcp - Encrypts files and/or strings with GCP KMS
@@ -35,10 +51,19 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
        crypt encrypt gcp [command options] [arguments...]
 
     OPTIONS:
+       --in value        the input file to decrypt, stdin if empty
+       --out value       the output file, stdout if empty
        --project value   the GCP project id for Cloud KMS
        --location value  the location for project and Cloud KMS
        --keyring value   the key ring name
        --key value       the cryptographic key name
+
+### Useful links
+
+- [Installing Google Cloud SDK](https://cloud.google.com/sdk/install)
+- [Setting Up Authentication for Server to Server Production Applications](https://cloud.google.com/docs/authentication/production)
+- [Cloud KMS - Quickstart](https://cloud.google.com/kms/docs/quickstart)
+- [Cloud KMS - Encrypting and Decrypting Data](https://cloud.google.com/kms/docs/encrypt-decrypt#kms-howto-encrypt-go)
 
 ## Development
 

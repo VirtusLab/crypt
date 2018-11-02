@@ -19,7 +19,7 @@ func (c *Crypt) EncryptFile(inputPath, outputPath string, params map[string]inte
 		logrus.Debugf("Can't open plaintext file: %v", err)
 		return err
 	}
-	err, result := c.kms.Encrypt(input, params)
+	result, err := c.kms.Encrypt(input, params)
 	if err != nil {
 		logrus.Debugf("Encrypting failed: %s", err)
 		return err
@@ -38,7 +38,7 @@ func (c *Crypt) DecryptFile(inputPath, outputPath string, params map[string]inte
 		logrus.Debugf("Can't open encrypted file: %v", err)
 		return err
 	}
-	err, result := c.kms.Decrypt(input, params)
+	result, err := c.kms.Decrypt(input, params)
 	if err != nil {
 		logrus.Debugf("Decrypting failed: %s", err)
 		return err

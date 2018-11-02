@@ -5,13 +5,13 @@ import (
 	"os"
 
 	"gopkg.in/urfave/cli.v1"
-	"github.com/VirtusLab/crypt/constants"
 	"github.com/Sirupsen/logrus"
-	"github.com/VirtusLab/crypt/version"
-	"github.com/VirtusLab/crypt/gcp"
-	"github.com/VirtusLab/crypt/crypto"
-	"github.com/VirtusLab/crypt/azure"
 	"github.com/VirtusLab/crypt/aws"
+	"github.com/VirtusLab/crypt/azure"
+	"github.com/VirtusLab/crypt/constants"
+	"github.com/VirtusLab/crypt/crypto"
+	"github.com/VirtusLab/crypt/gcp"
+	"github.com/VirtusLab/crypt/version"
 )
 
 var (
@@ -97,24 +97,24 @@ func encryptCommand() cli.Command {
 		Name:    "encrypt",
 		Aliases: []string{"enc", "en", "e"},
 		Usage:   "Encrypts files and/or strings",
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name:        "in",
-				Value:       "",
-				Usage:       "the input file to encrypt, stdin if empty",
-				Destination: &inputPath,
-			},
-			cli.StringFlag{
-				Name:        "out",
-				Value:       "",
-				Usage:       "the output file, stdout if empty",
-				Destination: &outputPath,
-			},
-		},
 		Subcommands: []cli.Command{
 			{
 				Name:  "azure",
 				Usage: "Encrypts files and/or strings with Azure Key Vault",
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:        "in",
+						Value:       "",
+						Usage:       "the input file to decrypt, stdin if empty",
+						Destination: &inputPath,
+					},
+					cli.StringFlag{
+						Name:        "out",
+						Value:       "",
+						Usage:       "the output file, stdout if empty",
+						Destination: &outputPath,
+					},
+				},
 				Action: func(c *cli.Context) error {
 					crypt := crypto.NewCrypt(azure.NewAzureKMS())
 					params := map[string]interface{}{
@@ -130,6 +130,20 @@ func encryptCommand() cli.Command {
 			{
 				Name:  "aws",
 				Usage: "Encrypts files and/or strings with AWS KMS",
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:        "in",
+						Value:       "",
+						Usage:       "the input file to decrypt, stdin if empty",
+						Destination: &inputPath,
+					},
+					cli.StringFlag{
+						Name:        "out",
+						Value:       "",
+						Usage:       "the output file, stdout if empty",
+						Destination: &outputPath,
+					},
+				},
 				Action: func(c *cli.Context) error {
 					crypt := crypto.NewCrypt(aws.NewAmazonKMS())
 					params := map[string]interface{}{
@@ -146,6 +160,18 @@ func encryptCommand() cli.Command {
 				Name:  "gcp",
 				Usage: "Encrypts files and/or strings with GCP KMS",
 				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:        "in",
+						Value:       "",
+						Usage:       "the input file to decrypt, stdin if empty",
+						Destination: &inputPath,
+					},
+					cli.StringFlag{
+						Name:        "out",
+						Value:       "",
+						Usage:       "the output file, stdout if empty",
+						Destination: &outputPath,
+					},
 					cli.StringFlag{
 						Name:        "project",
 						Value:       "",
@@ -195,24 +221,24 @@ func decryptCommand() cli.Command {
 		Name:    "decrypt",
 		Aliases: []string{"dec", "de", "d"},
 		Usage:   "Decrypts files and/or strings",
-		Flags: []cli.Flag{
-			cli.StringFlag{
-				Name:        "in",
-				Value:       "",
-				Usage:       "the input file to decrypt, stdin if empty",
-				Destination: &inputPath,
-			},
-			cli.StringFlag{
-				Name:        "out",
-				Value:       "",
-				Usage:       "the output file, stdout if empty",
-				Destination: &outputPath,
-			},
-		},
 		Subcommands: []cli.Command{
 			{
 				Name:  "azure",
 				Usage: "Decrypts files and/or strings with Azure Key Vault",
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:        "in",
+						Value:       "",
+						Usage:       "the input file to decrypt, stdin if empty",
+						Destination: &inputPath,
+					},
+					cli.StringFlag{
+						Name:        "out",
+						Value:       "",
+						Usage:       "the output file, stdout if empty",
+						Destination: &outputPath,
+					},
+				},
 				Action: func(c *cli.Context) error {
 					crypt := crypto.NewCrypt(azure.NewAzureKMS())
 					params := map[string]interface{}{
@@ -228,6 +254,20 @@ func decryptCommand() cli.Command {
 			{
 				Name:  "aws",
 				Usage: "Decrypts files and/or strings with AmazonKMS KMS",
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:        "in",
+						Value:       "",
+						Usage:       "the input file to decrypt, stdin if empty",
+						Destination: &inputPath,
+					},
+					cli.StringFlag{
+						Name:        "out",
+						Value:       "",
+						Usage:       "the output file, stdout if empty",
+						Destination: &outputPath,
+					},
+				},
 				Action: func(c *cli.Context) error {
 					crypt := crypto.NewCrypt(aws.NewAmazonKMS())
 					params := map[string]interface{}{
@@ -244,6 +284,18 @@ func decryptCommand() cli.Command {
 				Name:  "gcp",
 				Usage: "Decrypts files and/or strings with GCP KMS",
 				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:        "in",
+						Value:       "",
+						Usage:       "the input file to decrypt, stdin if empty",
+						Destination: &inputPath,
+					},
+					cli.StringFlag{
+						Name:        "out",
+						Value:       "",
+						Usage:       "the output file, stdout if empty",
+						Destination: &outputPath,
+					},
 					cli.StringFlag{
 						Name:        "project",
 						Value:       "",
