@@ -164,7 +164,7 @@ Not supported yet. Stay tuned.
 
     export PATH=$PATH:$GOPATH/bin
     cd $GOPATH/src/github.com/VirtusLab/crypt
-    go build
+    make all
 
 ## The name
 
