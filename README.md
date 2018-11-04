@@ -26,9 +26,7 @@ For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt
 
 #### Via Go
 
-```console
-$ go get github.com/VirtusLab/crypt
-```
+    $ go get github.com/VirtusLab/crypt
 
 ## Usage
 
