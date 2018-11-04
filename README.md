@@ -7,8 +7,10 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
   * [Via Go](README.md#via-go)
 * [Usage](README.md#usage)
   * [Encrypting and Decrypting with AWS KMS](README.md#encrypting-and-decrypting-with-aws-kms)
+    * [Examples](README.md#examples)
     * [Useful links](README.md#useful-links)
   * [Encrypting and Decrypting with GCP KMS](README.md#encrypting-and-decrypting-with-gcp-kms)
+    * [Examples](README.md#examples-1)
     * [Useful links](README.md#useful-links-1)
 * [Development](README.md#development)
 * [The Name](README.md#the-name)
@@ -51,8 +53,8 @@ $ go get github.com/VirtusLab/crypt
 
 ### Encrypting and Decrypting with AWS KMS
 
-`crypt` uses standard AWS client from official [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/).
-I can be configured using `~/.aws/credentials` and `~/.aws/config` or using environment variables.
+`crypt` uses standard client from official [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/).
+It can be configured using `~/.aws/credentials` and `~/.aws/config` or using environment variables.
 
     # Access Key ID
     AWS_ACCESS_KEY_ID=AKID
@@ -71,11 +73,11 @@ I can be configured using `~/.aws/credentials` and `~/.aws/config` or using envi
     # and AWS_REGION is not also set.
     AWS_DEFAULT_REGION=us-east-1
 
-Note that assuming AWS IAM role is not within crypt scope - you must do it yourself and provide valid credentials.
+**Note that assuming AWS IAM role is not within the scope of crypt - you must do it yourself and provide valid credentials.**
 
 For more details take a look at [Package session provides configuration for the SDK's service clients.](https://docs.aws.amazon.com/sdk-for-go/api/aws/session/).
 
-Encryption and decryption example
+#### Examples
 
     $ echo "top secret" > file.txt
     $ crypt en aws --in file.txt --out file.enc --region eu-west-1 --kms alias/test
@@ -103,6 +105,11 @@ For more details run `crypt en aws --help` or `crypt de aws --help`
 
 ### Encrypting and Decrypting with GCP KMS
 
+`crypt` uses [DefaultClient](https://godoc.org/golang.org/x/oauth2/google#DefaultClient) from official [Google Cloud Client Libraries for Go](https://github.com/GoogleCloudPlatform/google-cloud-go).
+It requires `GOOGLE_APPLICATION_CREDENTIALS` environment variable which points to the file with valid service account.
+
+#### Examples
+
 Set up Cloud KMS and corresponding service account
 
     $ gcloud init
@@ -111,7 +118,7 @@ Set up Cloud KMS and corresponding service account
     $ gcloud kms keys list --location global --keyring test
     $ export GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
 
-Encryption and decryption example
+Encryption and decryption
 
     $ echo "top secret" > file.txt
     $ crypt en gcp --in file.txt --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
