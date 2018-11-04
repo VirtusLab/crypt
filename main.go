@@ -106,13 +106,13 @@ func encrypt() cli.Command {
 				Usage: "Encrypts files and/or strings with Azure Key Vault",
 				Flags: []cli.Flag{
 					cli.StringFlag{
-						Name:        "in",
+						Name:        "in, input",
 						Value:       "",
 						Usage:       "the input file to decrypt, stdin if empty",
 						Destination: &inputPath,
 					},
 					cli.StringFlag{
-						Name:        "out",
+						Name:        "out, output",
 						Value:       "",
 						Usage:       "the output file, stdout if empty",
 						Destination: &outputPath,
@@ -135,13 +135,13 @@ func encrypt() cli.Command {
 				Usage: "Encrypts files and/or strings with AWS KMS",
 				Flags: []cli.Flag{
 					cli.StringFlag{
-						Name:        "in",
+						Name:        "in, input",
 						Value:       "",
 						Usage:       "the input file to decrypt, stdin if empty",
 						Destination: &inputPath,
 					},
 					cli.StringFlag{
-						Name:        "out",
+						Name:        "out, output",
 						Value:       "",
 						Usage:       "the output file, stdout if empty",
 						Destination: &outputPath,
@@ -177,13 +177,13 @@ func encrypt() cli.Command {
 				Usage: "Encrypts files and/or strings with GCP KMS",
 				Flags: []cli.Flag{
 					cli.StringFlag{
-						Name:        "in",
+						Name:        "in, input",
 						Value:       "",
 						Usage:       "the input file to decrypt, stdin if empty",
 						Destination: &inputPath,
 					},
 					cli.StringFlag{
-						Name:        "out",
+						Name:        "out, output",
 						Value:       "",
 						Usage:       "the output file, stdout if empty",
 						Destination: &outputPath,
@@ -243,13 +243,13 @@ func decrypt() cli.Command {
 				Usage: "Decrypts files and/or strings with Azure Key Vault",
 				Flags: []cli.Flag{
 					cli.StringFlag{
-						Name:        "in",
+						Name:        "in, input",
 						Value:       "",
 						Usage:       "the input file to decrypt, stdin if empty",
 						Destination: &inputPath,
 					},
 					cli.StringFlag{
-						Name:        "out",
+						Name:        "out, output",
 						Value:       "",
 						Usage:       "the output file, stdout if empty",
 						Destination: &outputPath,
@@ -272,13 +272,13 @@ func decrypt() cli.Command {
 				Usage: "Decrypts files and/or strings with AmazonKMS KMS",
 				Flags: []cli.Flag{
 					cli.StringFlag{
-						Name:        "in",
+						Name:        "in, input",
 						Value:       "",
 						Usage:       "the input file to decrypt, stdin if empty",
 						Destination: &inputPath,
 					},
 					cli.StringFlag{
-						Name:        "out",
+						Name:        "out, output",
 						Value:       "",
 						Usage:       "the output file, stdout if empty",
 						Destination: &outputPath,
@@ -308,13 +308,13 @@ func decrypt() cli.Command {
 				Usage: "Decrypts files and/or strings with GCP KMS",
 				Flags: []cli.Flag{
 					cli.StringFlag{
-						Name:        "in",
+						Name:        "in, input",
 						Value:       "",
 						Usage:       "the input file to decrypt, stdin if empty",
 						Destination: &inputPath,
 					},
 					cli.StringFlag{
-						Name:        "out",
+						Name:        "out, output",
 						Value:       "",
 						Usage:       "the output file, stdout if empty",
 						Destination: &outputPath,

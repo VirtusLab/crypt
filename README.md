@@ -26,6 +26,34 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
        --help, -h     show help
        --version, -v  print the version
 
+### Encrypting and Decrypting with AWS KMS
+
+Encryption and decryption example
+
+    $ echo "top secret" > file.txt
+    $ crypt en aws --in file.txt --out file.enc --region eu-west-1 --kms alias/test
+    $ crypt de aws --in file.enc --out file.dec --region eu-west-1
+
+For more details run `crypt en aws --help` or `crypt de aws --help`
+
+    NAME:
+       crypt encrypt aws - Encrypts files and/or strings with AWS KMS
+
+    USAGE:
+       crypt encrypt aws [command options] [arguments...]
+
+    OPTIONS:
+       --in value, --input value                       the input file to decrypt, stdin if empty
+       --out value, --output value                     the output file, stdout if empty
+       --region value                                  the AWS region
+       --key-id value, --kms value, --kms-alias value  the Amazon Resource Name (ARN), alias name, or alias ARN for the customer master key
+
+#### Useful links
+
+- [AWS Key Management Service (KMS)](https://aws.amazon.com/kms/)
+- [AWS KMS Creating Keys](https://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html)
+- [AWS KMS CLI command reference](https://docs.aws.amazon.com/cli/latest/reference/kms/index.html#cli-aws-kms)
+
 ### Encrypting and Decrypting with GCP KMS
 
 Set up Cloud KMS and corresponding service account
@@ -51,14 +79,15 @@ For more details run `crypt en gcp --help` or `crypt de gcp --help`
        crypt encrypt gcp [command options] [arguments...]
 
     OPTIONS:
-       --in value        the input file to decrypt, stdin if empty
-       --out value       the output file, stdout if empty
-       --project value   the GCP project id for Cloud KMS
-       --location value  the location for project and Cloud KMS
-       --keyring value   the key ring name
-       --key value       the cryptographic key name
+       --in value, --input value    the input file to decrypt, stdin if empty
+       --out value, --output value  the output file, stdout if empty
+       --project value              the GCP project id for Cloud KMS
+       --location value             the location for project and Cloud KMS
+       --keyring value              the key ring name
+       --key value                  the cryptographic key name
 
-### Useful links
+
+#### Useful links
 
 - [Installing Google Cloud SDK](https://cloud.google.com/sdk/install)
 - [Setting Up Authentication for Server to Server Production Applications](https://cloud.google.com/docs/authentication/production)
