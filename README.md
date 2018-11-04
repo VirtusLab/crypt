@@ -17,7 +17,7 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
 
 #### Binaries
 
-For binaries please visit the [Releases Page](https://github.com/VirtusLab/render/releases).
+For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt/releases).
 
 #### Via Go
 
@@ -50,6 +50,30 @@ $ go get github.com/VirtusLab/crypt
        --version, -v  print the version
 
 ### Encrypting and Decrypting with AWS KMS
+
+`crypt` uses standard AWS client from official [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/).
+I can be configured using `~/.aws/credentials` and `~/.aws/config` or using environment variables.
+
+    # Access Key ID
+    AWS_ACCESS_KEY_ID=AKID
+    AWS_ACCESS_KEY=AKID # only read if AWS_ACCESS_KEY_ID is not set.
+
+    # Secret Access Key
+    AWS_SECRET_ACCESS_KEY=SECRET
+    AWS_SECRET_KEY=SECRET=SECRET # only read if AWS_SECRET_ACCESS_KEY is not set.
+
+    # Session Token
+    AWS_SESSION_TOKEN=TOKEN
+
+    AWS_REGION=us-east-1
+
+    # AWS_DEFAULT_REGION is only read if AWS_SDK_LOAD_CONFIG is also set,
+    # and AWS_REGION is not also set.
+    AWS_DEFAULT_REGION=us-east-1
+
+Note that assuming AWS IAM role is not within crypt scope - you must do it yourself and provide valid credentials.
+
+For more details take a look at [Package session provides configuration for the SDK's service clients.](https://docs.aws.amazon.com/sdk-for-go/api/aws/session/).
 
 Encryption and decryption example
 
