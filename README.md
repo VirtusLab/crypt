@@ -2,6 +2,29 @@
 
 Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
 
+* [Installation](README.md#installation)
+  * [Binaries](README.md#binaries)
+  * [Via Go](README.md#via-go)
+* [Usage](README.md#usage)
+  * [Encrypting and Decrypting with AWS KMS](README.md#encrypting-and-decrypting-with-aws-kms)
+    * [Useful links](README.md#useful-links)
+  * [Encrypting and Decrypting with GCP KMS](README.md#encrypting-and-decrypting-with-gcp-kms)
+    * [Useful links](README.md#useful-links-1)
+* [Development](README.md#development)
+* [The Name](README.md#the-name)
+
+## Installation
+
+#### Binaries
+
+For binaries please visit the [Releases Page](https://github.com/VirtusLab/render/releases).
+
+#### Via Go
+
+```console
+$ go get github.com/VirtusLab/crypt
+```
+
 ## Usage
 
     NAME:
