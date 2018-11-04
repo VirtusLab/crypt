@@ -1,0 +1,15 @@
+language: go
+sudo: false
+
+go:
+- 1.10.x
+
+matrix:
+  fast_finish: true
+
+before_install:
+- go get golang.org/x/lint/golint
+- go get honnef.co/go/tools/cmd/staticcheck
+
+script:
+- make verify
