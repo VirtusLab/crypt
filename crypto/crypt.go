@@ -5,14 +5,19 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Crypt structure holds implementation of particular Key Management Service e.g. AWS KMS
 type Crypt struct {
 	kms KMS
 }
 
+// NewCrypt creates a new crypt with corresponding Key Management Service
 func NewCrypt(kms KMS) *Crypt {
 	return &Crypt{kms: kms}
 }
 
+// EncryptFile reads from file or stdin if inputPath is empty.
+// Then encrypts content with corresponding Key Management Service.
+// Ciphertext is saved under outputPath or print on stdout if empty.
 func (c *Crypt) EncryptFile(inputPath, outputPath string, params map[string]interface{}) error {
 	input, err := files.ReadInput(inputPath)
 	if err != nil {
@@ -32,6 +37,9 @@ func (c *Crypt) EncryptFile(inputPath, outputPath string, params map[string]inte
 	return nil
 }
 
+// DecryptFile reads from file or stdin if inputPath is empty.
+// Then decrypts content with corresponding Key Management Service.
+// Plaintext is saved under outputPath or print on stdout if empty.
 func (c *Crypt) DecryptFile(inputPath, outputPath string, params map[string]interface{}) error {
 	input, err := files.ReadInput(inputPath)
 	if err != nil {

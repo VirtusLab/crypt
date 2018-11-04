@@ -19,14 +19,18 @@ var (
 	inputPath  string
 	outputPath string
 
-	// gcp kms
-	gcpProject  string
+	// GCP Cloud KMS resources belong to a project
+	gcpProject string
+	// The geographical data center location where requests to Cloud KMS are handled
 	gcpLocation string
-	gcpKeyring  string
-	gcpKey      string
+	// A key ring is a grouping of keys for organizational purposes
+	gcpKeyring string
+	// A key is a named object representing a cryptographic key used for a specific purpose
+	gcpKey string
 
-	// aws kms
-	awsKms    string
+	// Amazon Resource Name (ARN), alias name or alias ARN for the customer master key
+	awsKms string
+	//  The geographical data center location where requests to AWS KMS are handled
 	awsRegion string
 )
 
@@ -216,10 +220,10 @@ func encrypt() cli.Command {
 				Action: func(c *cli.Context) error {
 					crypt := crypto.NewCrypt(gcp.NewGoogleKMS())
 					params := map[string]interface{}{
-						gcp.ProjectId: gcpProject,
-						gcp.Location:  gcpLocation,
-						gcp.KeyRing:   gcpKeyring,
-						gcp.Key:       gcpKey,
+						gcp.Project:  gcpProject,
+						gcp.Location: gcpLocation,
+						gcp.KeyRing:  gcpKeyring,
+						gcp.Key:      gcpKey,
 					}
 					err := crypt.EncryptFile(inputPath, outputPath, params)
 					if err != nil {
@@ -347,10 +351,10 @@ func decrypt() cli.Command {
 				Action: func(c *cli.Context) error {
 					crypt := crypto.NewCrypt(gcp.NewGoogleKMS())
 					params := map[string]interface{}{
-						gcp.ProjectId: gcpProject,
-						gcp.Location:  gcpLocation,
-						gcp.KeyRing:   gcpKeyring,
-						gcp.Key:       gcpKey,
+						gcp.Project:  gcpProject,
+						gcp.Location: gcpLocation,
+						gcp.KeyRing:  gcpKeyring,
+						gcp.Key:      gcpKey,
 					}
 					err := crypt.DecryptFile(inputPath, outputPath, params)
 					if err != nil {

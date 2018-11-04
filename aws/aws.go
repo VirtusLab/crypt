@@ -10,27 +10,41 @@ import (
 )
 
 const (
-	KMS    = "kms"
+	// KMS - this is constant used in params
+	KMS = "kms"
+	// Region - this is constant used in params
 	Region = "region"
 )
 
+var (
+	// ErrKmsMissing - this is the custom error, returned when name, alias or arn is missing
+	ErrKmsMissing = errors.New("kms is empty or missing")
+	// ErrRegionMissing - this is the custom error, returned when the region is missing
+	ErrRegionMissing = errors.New("region is empty or missing")
+)
+
+// AmazonKMS struct represents AWS Key Management Service
 type AmazonKMS struct{}
 
+// NewAmazonKMS creates AWS KMS
 func NewAmazonKMS() *AmazonKMS {
 	return &AmazonKMS{}
 }
 
+// Encrypt is responsible for encrypting plaintext and returning ciphertext in bytes using AWS KMS.
+// All configuration is passed in params with according validation.
+// See Crypt.EncryptFile
 func (a *AmazonKMS) Encrypt(plaintext []byte, params map[string]interface{}) ([]byte, error) {
 	awsKms := params[KMS].(string)
 	if len(awsKms) == 0 {
-		logrus.Debugf("Error reading awsKms: %v", awsKms)
-		return nil, errors.New("awsKms is empty or missing!")
+		logrus.Debugf("Error reading kms: %v", awsKms)
+		return nil, ErrKmsMissing
 	}
 
 	region := params[Region].(string)
 	if len(region) == 0 {
 		logrus.Debugf("Error reading region: %v", region)
-		return nil, errors.New("region is empty or missing!")
+		return nil, ErrRegionMissing
 	}
 
 	// use AWS_DEFAULT_PROFILE environment variable to set profile
@@ -52,11 +66,14 @@ func (a *AmazonKMS) Encrypt(plaintext []byte, params map[string]interface{}) ([]
 	return []byte(output.CiphertextBlob), nil
 }
 
+// Decrypt is responsible for decrypting ciphertext and returning plaintext in bytes using AWS KMS.
+// All configuration is passed in params with according validation.
+// See Crypt.DecryptFile
 func (a *AmazonKMS) Decrypt(ciphertext []byte, params map[string]interface{}) ([]byte, error) {
 	region := params[Region].(string)
 	if len(region) == 0 {
 		logrus.Debugf("Error reading region: %v", region)
-		return nil, errors.New("region is empty or missing!")
+		return nil, ErrRegionMissing
 	}
 
 	// use AWS_DEFAULT_PROFILE environment variable to set profile
