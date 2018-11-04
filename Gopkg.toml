@@ -34,9 +34,5 @@
   version = "1.20.0"
 
 [[constraint]]
-  name = "github.com/Sirupsen/logrus"
-  version = "1.2.0"
-
-[[constraint]]
   branch = "master"
   name = "google.golang.org/api"
