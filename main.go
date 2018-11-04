@@ -150,13 +150,13 @@ func encrypt() cli.Command {
 						Name:        "region",
 						Value:       "",
 						Usage:       "the AWS region",
-						Destination: &awsRegion,
+						Destination: &awsRegion, // FIXME #2 make this flag required
 					},
 					cli.StringFlag{
 						Name:        "key-id, kms, kms-alias",
 						Value:       "",
 						Usage:       "the Amazon Resource Name (ARN), alias name, or alias ARN for the customer master key",
-						Destination: &awsKms,
+						Destination: &awsKms, // FIXME #2 make this flag required
 					},
 				},
 				Action: func(c *cli.Context) error {
@@ -192,25 +192,25 @@ func encrypt() cli.Command {
 						Name:        "project",
 						Value:       "",
 						Usage:       "the GCP project id for Cloud KMS",
-						Destination: &gcpProject,
+						Destination: &gcpProject, // FIXME #2 make this flag required
 					},
 					cli.StringFlag{
 						Name:        "location",
 						Value:       "",
 						Usage:       "the location for project and Cloud KMS",
-						Destination: &gcpLocation,
+						Destination: &gcpLocation, // FIXME #2 make this flag required
 					},
 					cli.StringFlag{
 						Name:        "keyring",
 						Value:       "",
 						Usage:       "the key ring name",
-						Destination: &gcpKeyring,
+						Destination: &gcpKeyring, // FIXME #2 make this flag required
 					},
 					cli.StringFlag{
 						Name:        "key",
 						Value:       "",
 						Usage:       "the cryptographic key name",
-						Destination: &gcpKey,
+						Destination: &gcpKey, // FIXME #2 make this flag required
 					},
 				},
 				Action: func(c *cli.Context) error {
@@ -287,7 +287,7 @@ func decrypt() cli.Command {
 						Name:        "region",
 						Value:       "",
 						Usage:       "the AWS region",
-						Destination: &awsRegion,
+						Destination: &awsRegion, // FIXME #2 make this flag required
 					},
 				},
 				Action: func(c *cli.Context) error {
@@ -323,25 +323,25 @@ func decrypt() cli.Command {
 						Name:        "project",
 						Value:       "",
 						Usage:       "the GCP project id for Cloud KMS",
-						Destination: &gcpProject,
+						Destination: &gcpProject, // FIXME #2 make this flag required
 					},
 					cli.StringFlag{
 						Name:        "location",
 						Value:       "",
 						Usage:       "the location for project and Cloud KMS",
-						Destination: &gcpLocation,
+						Destination: &gcpLocation, // FIXME #2 make this flag required
 					},
 					cli.StringFlag{
 						Name:        "keyring",
 						Value:       "",
 						Usage:       "the key ring name",
-						Destination: &gcpKeyring,
+						Destination: &gcpKeyring, // FIXME #2 make this flag required
 					},
 					cli.StringFlag{
 						Name:        "key",
 						Value:       "",
 						Usage:       "the cryptographic key name",
-						Destination: &gcpKey,
+						Destination: &gcpKey, // FIXME #2 make this flag required
 					},
 				},
 				Action: func(c *cli.Context) error {
