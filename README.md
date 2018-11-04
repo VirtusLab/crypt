@@ -12,6 +12,9 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
   * [Encrypting and Decrypting with GCP KMS](README.md#encrypting-and-decrypting-with-gcp-kms)
     * [Examples](README.md#examples-1)
     * [Useful links](README.md#useful-links-1)
+  * [Encrypting and Decrypting with Azure Key Vault](README.md#encrypting-and-decrypting-with-azure-key-vault)
+    * [Examples](README.md#examples-1)
+    * [Useful links](README.md#useful-links-1)
 * [Development](README.md#development)
 * [The Name](README.md#the-name)
 
@@ -147,6 +150,10 @@ For more details run `crypt en gcp --help` or `crypt de gcp --help`
 - [Setting Up Authentication for Server to Server Production Applications](https://cloud.google.com/docs/authentication/production)
 - [Cloud KMS - Quickstart](https://cloud.google.com/kms/docs/quickstart)
 - [Cloud KMS - Encrypting and Decrypting Data](https://cloud.google.com/kms/docs/encrypt-decrypt#kms-howto-encrypt-go)
+
+### Encrypting and Decrypting with Azure Key Vault
+
+Not supported yet. Stay tuned.
 
 ## Development
 
