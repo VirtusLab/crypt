@@ -26,7 +26,7 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
        --help, -h     show help
        --version, -v  print the version
 
-### Encrypting/Decrypting with GCP KMS
+### Encrypting and Decrypting with GCP KMS
 
 Set up Cloud KMS and corresponding service account
 

@@ -24,6 +24,10 @@ var (
 	gcpLocation string
 	gcpKeyring  string
 	gcpKey      string
+
+	// aws kms
+	awsKms    string
+	awsRegion string
 )
 
 func main() {
@@ -33,10 +37,9 @@ func main() {
 	app.Author = constants.Author
 	app.Version = fmt.Sprintf("%s-%s", version.VERSION, version.GITCOMMIT)
 	app.Before = preload
-
 	app.Commands = []cli.Command{
-		encryptCommand(),
-		decryptCommand(),
+		encrypt(),
+		decrypt(),
 	}
 
 	app.Flags = []cli.Flag{
@@ -92,7 +95,7 @@ func preload(c *cli.Context) error {
 	return nil
 }
 
-func encryptCommand() cli.Command {
+func encrypt() cli.Command {
 	return cli.Command{
 		Name:    "encrypt",
 		Aliases: []string{"enc", "en", "e"},
@@ -143,11 +146,24 @@ func encryptCommand() cli.Command {
 						Usage:       "the output file, stdout if empty",
 						Destination: &outputPath,
 					},
+					cli.StringFlag{
+						Name:        "region",
+						Value:       "",
+						Usage:       "the AWS region",
+						Destination: &awsRegion,
+					},
+					cli.StringFlag{
+						Name:        "key-id, kms, kms-alias",
+						Value:       "",
+						Usage:       "the Amazon Resource Name (ARN), alias name, or alias ARN for the customer master key",
+						Destination: &awsKms,
+					},
 				},
 				Action: func(c *cli.Context) error {
 					crypt := crypto.NewCrypt(aws.NewAmazonKMS())
 					params := map[string]interface{}{
-						// TODO add necessary params
+						aws.KMS:    awsKms,
+						aws.Region: awsRegion,
 					}
 					err := crypt.EncryptFile(inputPath, outputPath, params)
 					if err != nil {
@@ -216,7 +232,7 @@ func encryptCommand() cli.Command {
 	}
 }
 
-func decryptCommand() cli.Command {
+func decrypt() cli.Command {
 	return cli.Command{
 		Name:    "decrypt",
 		Aliases: []string{"dec", "de", "d"},
@@ -267,11 +283,18 @@ func decryptCommand() cli.Command {
 						Usage:       "the output file, stdout if empty",
 						Destination: &outputPath,
 					},
+					cli.StringFlag{
+						Name:        "region",
+						Value:       "",
+						Usage:       "the AWS region",
+						Destination: &awsRegion,
+					},
 				},
 				Action: func(c *cli.Context) error {
 					crypt := crypto.NewCrypt(aws.NewAmazonKMS())
 					params := map[string]interface{}{
-						// TODO add necessary params
+						aws.KMS:    awsKms,
+						aws.Region: awsRegion,
 					}
 					err := crypt.DecryptFile(inputPath, outputPath, params)
 					if err != nil {
