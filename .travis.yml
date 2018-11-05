@@ -1,14 +1,22 @@
-language: go
 sudo: false
+language: go
 go:
 - 1.10.x
+
 matrix:
   fast_finish: true
+
 before_install:
 - go get golang.org/x/lint/golint
 - go get honnef.co/go/tools/cmd/staticcheck
+
 script:
 - make verify
+
+before_deploy:
+- make release
+- echo "Deploying to GitHub releases ..."
+
 deploy:
   provider: releases
   api_key:
