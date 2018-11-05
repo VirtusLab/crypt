@@ -1,15 +1,50 @@
 language: go
 sudo: false
-
 go:
 - 1.10.x
-
 matrix:
   fast_finish: true
-
 before_install:
 - go get golang.org/x/lint/golint
 - go get honnef.co/go/tools/cmd/staticcheck
-
 script:
 - make verify
+deploy:
+  provider: releases
+  api_key:
+    secure: ABJNav059RrbYkEyQelnxtuzAxCl7YdpwYojH1ifZwcMc//haxqalriwx/WfV5K+AKUM0ouDSRfzKsjWo6HOVagRtBXe+FL7BlnFbngLjpqrsbdv+InBj0O6I+AWOVSAz1gKhrQZwpUseNTG4LoL/n5Pv4GeyDqA9H2AyHvbMjX1+Uzk2mbknKdfGzVUt6GDCeG+gVlsuTi4Bys1zmAQUTl3rXfOtUxkuIUmiq5dbKT7WaMHsLEnd5F24YwSSDBHzYetSN92v6mbaGxbl0GRhlwTeD1KdGIonBGlJEqSsxY1GX3t7blbRt2y/27rxLTN5Zsjwb6Y9CxBZm08bmPxDoxpT+AvP2yLhyeNjiDup+K0YfFDnfj7PY6QtCWTa+MKSIHrXa4fJH1izyuZHPqV2l56trgdJ3IyR5MVjD+aA4McnVq+PzhfsC4bErmOtDMpcqaLMDV2r1YjGmI7cmDeyOcsdyhL8D/V5oxv2t4kHmr+pvp3Df7xgpaf6ts+e5ZLBe5mGVwwxcI2A8OcAxXrtWOxeY8u2H4+mzGPsqUAivhgrKgWpsNEsfwiTay3NDT51XXd29Vlv8tyRMJ2vQwP53ukmsZQiaEpUGPsOYU+WyQOEVj1/Z4grKcA455WnDSX9c38aUR+xUUoN4/WXMHdvQK5hIJ6cm0DVpACCVqmUsM=
+  skip_cleanup: true
+  on:
+    repo: VirtusLab/crypt
+    tags: true
+  file:
+  - cross/crypt-darwin-amd64
+  - cross/crypt-darwin-amd64.md5
+  - cross/crypt-darwin-amd64.sha256
+  - cross/crypt-darwin-386
+  - cross/crypt-darwin-386.md5
+  - cross/crypt-darwin-386.sha256
+  - cross/crypt-freebsd-amd64
+  - cross/crypt-freebsd-amd64.md5
+  - cross/crypt-freebsd-amd64.sha256
+  - cross/crypt-freebsd-386
+  - cross/crypt-freebsd-386.md5
+  - cross/crypt-freebsd-386.sha256
+  - cross/crypt-linux-arm
+  - cross/crypt-linux-arm.md5
+  - cross/crypt-linux-arm.sha256
+  - cross/crypt-linux-arm64
+  - cross/crypt-linux-arm64.md5
+  - cross/crypt-linux-arm64.sha256
+  - cross/crypt-linux-amd64
+  - cross/crypt-linux-amd64.md5
+  - cross/crypt-linux-amd64.sha256
+  - cross/crypt-linux-386
+  - cross/crypt-linux-386.md5
+  - cross/crypt-linux-386.sha256
+  - cross/crypt-windows-amd64
+  - cross/crypt-windows-amd64.md5
+  - cross/crypt-windows-amd64.sha256
+  - cross/crypt-windows-386
+  - cross/crypt-windows-386.md5
+  - cross/crypt-windows-386.sha256
