@@ -1,5 +1,7 @@
 # crypt
 
+[![Build Status](https://travis-ci.org/VirtusLab/crypt.svg?branch=master)](https://travis-ci.org/VirtusLab/crypt)
+
 Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
 
 * [Installation](README.md#installation)
