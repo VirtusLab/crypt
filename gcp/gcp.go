@@ -27,9 +27,9 @@ var (
 	ErrProjectMissing = errors.New("project is empty or missing")
 	// ErrLocationMissing = this is the custom error, returned when the location is missing
 	ErrLocationMissing = errors.New("location is empty or missing")
-	// ErrKeyRingMissing = this is the custom error, returned when the location is missing
+	// ErrKeyRingMissing = this is the custom error, returned when the key ring is missing
 	ErrKeyRingMissing = errors.New("key ring is empty or missing")
-	// ErrKeyMissing = this is the custom error, returned when the location is missing
+	// ErrKeyMissing = this is the custom error, returned when the key is missing
 	ErrKeyMissing = errors.New("key is empty or missing")
 )
 

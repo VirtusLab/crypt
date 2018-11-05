@@ -6,13 +6,13 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
   * [Binaries](README.md#binaries)
   * [Via Go](README.md#via-go)
 * [Usage](README.md#usage)
-  * [Encrypting and Decrypting with AWS KMS](README.md#encrypting-and-decrypting-with-aws-kms)
+  * [Encryption using AWS KMS](README.md#encryption-using-aws-kms)
     * [Examples](README.md#examples)
     * [Useful links](README.md#useful-links)
-  * [Encrypting and Decrypting with GCP KMS](README.md#encrypting-and-decrypting-with-gcp-kms)
+  * [Encryption using GCP KMS](README.md#encryption-using-gcp-kms)
     * [Examples](README.md#examples-1)
     * [Useful links](README.md#useful-links-1)
-  * [Encrypting and Decrypting with Azure Key Vault](README.md#encrypting-and-decrypting-with-azure-key-vault)
+  * [Encryption using Azure Key Vault](README.md#encryption-using-azure-key-vault)
     * [Examples](README.md#examples-1)
     * [Useful links](README.md#useful-links-1)
 * [Development](README.md#development)
@@ -52,35 +52,22 @@ For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt
        --help, -h     show help
        --version, -v  print the version
 
-### Encrypting and Decrypting with AWS KMS
+### Encryption using AWS KMS
 
-`crypt` uses client from official [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/).
-You can either run `aws configure` (if you don't have ~/.aws/credentials already) or set environment variables (described below).
-
-    # Access Key ID
-    AWS_ACCESS_KEY_ID=AKID
-    AWS_ACCESS_KEY=AKID # only read if AWS_ACCESS_KEY_ID is not set.
-
-    # Secret Access Key
-    AWS_SECRET_ACCESS_KEY=SECRET
-    AWS_SECRET_KEY=SECRET=SECRET # only read if AWS_SECRET_ACCESS_KEY is not set.
-
-    # Session Token
-    AWS_SESSION_TOKEN=TOKEN
-
-    AWS_REGION=us-east-1
-
-    # AWS_DEFAULT_REGION is only read if AWS_SDK_LOAD_CONFIG is also set,
-    # and AWS_REGION is not also set.
-    AWS_DEFAULT_REGION=us-east-1
-
-For more details take a look at [Package session provides configuration for the SDK's service clients.](https://docs.aws.amazon.com/sdk-for-go/api/aws/session/).
+`crypt` uses client from [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/).
+You can either run `aws configure` (if you don't have ~/.aws/credentials already) or set [environment variables](https://docs.aws.amazon.com/sdk-for-go/api/aws/session).
 
 #### Examples
+
+Example usage with file:
 
     $ echo "top secret" > file.txt
     $ crypt en aws --in file.txt --out file.enc --region eu-west-1 --kms alias/test
     $ crypt de aws --in file.enc --out file.dec --region eu-west-1
+
+Example usage with stdin:
+
+    $ echo "top secret" | crypt en aws --out file.enc --region eu-west-1 --kms alias/test
 
 For more details run `crypt en aws --help` or `crypt de aws --help`
 
@@ -102,26 +89,22 @@ For more details run `crypt en aws --help` or `crypt de aws --help`
 - [AWS KMS Creating Keys](https://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html)
 - [AWS KMS CLI command reference](https://docs.aws.amazon.com/cli/latest/reference/kms/index.html#cli-aws-kms)
 
-### Encrypting and Decrypting with GCP KMS
+### Encryption using with GCP KMS
 
 `crypt` uses [DefaultClient](https://godoc.org/golang.org/x/oauth2/google#DefaultClient) from official [Google Cloud Client Libraries for Go](https://github.com/GoogleCloudPlatform/google-cloud-go).
 You can either run `gcloud auth application-default login` or set `GOOGLE_APPLICATION_CREDENTIALS` environment variable which points to the file with valid service account.
 
 #### Examples
 
-Set up Cloud KMS and corresponding service account
-
-    $ gcloud init
-    $ gcloud kms keyrings create test --location global
-    $ gcloud kms keys create quickstart --location global --keyring test --purpose encryption
-    $ gcloud kms keys list --location global --keyring test
-    $ export GOOGLE_APPLICATION_CREDENTIALS="[PATH]"
-
-Encryption and decryption
+Example usage with file:
 
     $ echo "top secret" > file.txt
     $ crypt en gcp --in file.txt --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
     $ crypt de gcp --in file.enc --out file.dec --project lunar-compiler-123456 --location global --keyring test --key quickstart
+
+Example usage with stdin:
+
+    $ echo "top secret" | crypt en gcp --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
 
 For more details run `crypt en gcp --help` or `crypt de gcp --help`
 
@@ -148,7 +131,7 @@ For more details run `crypt en gcp --help` or `crypt de gcp --help`
 - [Cloud KMS - Quickstart](https://cloud.google.com/kms/docs/quickstart)
 - [Cloud KMS - Encrypting and Decrypting Data](https://cloud.google.com/kms/docs/encrypt-decrypt#kms-howto-encrypt-go)
 
-### Encrypting and Decrypting with Azure Key Vault
+### Encryption using Azure Key Vault
 
 Not supported yet. Stay tuned.
 
