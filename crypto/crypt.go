@@ -15,9 +15,9 @@ func NewCrypt(kms KMS) *Crypt {
 	return &Crypt{kms: kms}
 }
 
-// EncryptFile reads from file or stdin if inputPath is empty.
+// EncryptFile reads from the inputPath file or stdin if empty.
 // Then encrypts content with corresponding Key Management Service.
-// Ciphertext is saved under outputPath or print on stdout if empty.
+// Ciphertext is saved into outputPath file or print on stdout if empty.
 func (c *Crypt) EncryptFile(inputPath, outputPath string, params map[string]interface{}) error {
 	input, err := files.ReadInput(inputPath)
 	if err != nil {
@@ -29,7 +29,7 @@ func (c *Crypt) EncryptFile(inputPath, outputPath string, params map[string]inte
 		logrus.Debugf("Encrypting failed: %s", err)
 		return err
 	}
-	err = files.WriteOutput(outputPath, result, 0644)
+	err = files.WriteOutput(outputPath, result, 0644) // 0644 - user: read&write, group: read, other: read
 	if err != nil {
 		logrus.Debugf("Can't save the encrypted file: %v", err)
 		return err
@@ -37,9 +37,9 @@ func (c *Crypt) EncryptFile(inputPath, outputPath string, params map[string]inte
 	return nil
 }
 
-// DecryptFile reads from file or stdin if inputPath is empty.
+// DecryptFile reads from the inputPath file or stdin if empty.
 // Then decrypts content with corresponding Key Management Service.
-// Plaintext is saved under outputPath or print on stdout if empty.
+// Plaintext is saved into outputPath file or print on stdout if empty.
 func (c *Crypt) DecryptFile(inputPath, outputPath string, params map[string]interface{}) error {
 	input, err := files.ReadInput(inputPath)
 	if err != nil {
@@ -51,7 +51,7 @@ func (c *Crypt) DecryptFile(inputPath, outputPath string, params map[string]inte
 		logrus.Debugf("Decrypting failed: %s", err)
 		return err
 	}
-	err = files.WriteOutput(outputPath, result, 0644)
+	err = files.WriteOutput(outputPath, result, 0644) // 0644 - user: read&write, group: read, other: read
 	if err != nil {
 		logrus.Debugf("Can't save the decrypted file: %v", err)
 		return err

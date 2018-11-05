@@ -30,7 +30,7 @@ var (
 
 	// Amazon Resource Name (ARN), alias name or alias ARN for the customer master key
 	awsKms string
-	//  The geographical data center location where requests to AWS KMS are handled
+	// The geographical data center location where requests to AWS KMS are handled
 	awsRegion string
 )
 

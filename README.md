@@ -54,8 +54,8 @@ For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt
 
 ### Encrypting and Decrypting with AWS KMS
 
-`crypt` uses standard client from official [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/).
-It can be configured using `~/.aws/credentials` and `~/.aws/config` or using environment variables.
+`crypt` uses client from official [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/).
+You can either run `aws configure` (if you don't have ~/.aws/credentials already) or set environment variables (described below).
 
     # Access Key ID
     AWS_ACCESS_KEY_ID=AKID
@@ -73,8 +73,6 @@ It can be configured using `~/.aws/credentials` and `~/.aws/config` or using env
     # AWS_DEFAULT_REGION is only read if AWS_SDK_LOAD_CONFIG is also set,
     # and AWS_REGION is not also set.
     AWS_DEFAULT_REGION=us-east-1
-
-**Note that assuming AWS IAM role is not within the scope of crypt - you must do it yourself and provide valid credentials.**
 
 For more details take a look at [Package session provides configuration for the SDK's service clients.](https://docs.aws.amazon.com/sdk-for-go/api/aws/session/).
 
@@ -107,7 +105,7 @@ For more details run `crypt en aws --help` or `crypt de aws --help`
 ### Encrypting and Decrypting with GCP KMS
 
 `crypt` uses [DefaultClient](https://godoc.org/golang.org/x/oauth2/google#DefaultClient) from official [Google Cloud Client Libraries for Go](https://github.com/GoogleCloudPlatform/google-cloud-go).
-It requires `GOOGLE_APPLICATION_CREDENTIALS` environment variable which points to the file with valid service account.
+You can either run `gcloud auth application-default login` or set `GOOGLE_APPLICATION_CREDENTIALS` environment variable which points to the file with valid service account.
 
 #### Examples
 
@@ -145,6 +143,7 @@ For more details run `crypt en gcp --help` or `crypt de gcp --help`
 #### Useful links
 
 - [Installing Google Cloud SDK](https://cloud.google.com/sdk/install)
+- [gcloud auth application-default login](https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login)
 - [Setting Up Authentication for Server to Server Production Applications](https://cloud.google.com/docs/authentication/production)
 - [Cloud KMS - Quickstart](https://cloud.google.com/kms/docs/quickstart)
 - [Cloud KMS - Encrypting and Decrypting Data](https://cloud.google.com/kms/docs/encrypt-decrypt#kms-howto-encrypt-go)
