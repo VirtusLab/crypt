@@ -39,7 +39,7 @@ For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt
        crypt [global options] command [command options] [arguments...]
 
     VERSION:
-       v0.0.1
+       v0.0.2
 
     AUTHOR:
        VirtusLab
