@@ -19,6 +19,11 @@ var (
 	inputPath  string
 	outputPath string
 
+	// Azure kms
+	azureVaultURL   string
+	azureKeyName    string
+	azureKeyVersion string
+
 	// GCP Cloud KMS resources belong to a project
 	gcpProject string
 	// The geographical data center location where requests to Cloud KMS are handled
@@ -121,13 +126,34 @@ func encrypt() cli.Command {
 						Usage:       "the output file, stdout if empty",
 						Destination: &outputPath,
 					},
+					cli.StringFlag{
+						Name:        "vaultURL",
+						Value:       "",
+						Usage:       "Azure vault URL",
+						Destination: &azureVaultURL,
+					},
+					cli.StringFlag{
+						Name:        "name",
+						Value:       "",
+						Usage:       "the key name",
+						Destination: &azureKeyName,
+					},
+					cli.StringFlag{
+						Name:        "version",
+						Value:       "",
+						Usage:       "the key version",
+						Destination: &azureKeyVersion,
+					},
 				},
 				Action: func(c *cli.Context) error {
 					crypt := crypto.NewCrypt(azure.NewAzureKMS())
 					params := map[string]interface{}{
-						// TODO add necessary params
+						azure.VaultURL: azureVaultURL,
+						azure.Name:     azureKeyName,
+						azure.Version:  azureKeyVersion,
 					}
 					err := crypt.EncryptFile(inputPath, outputPath, params)
+
 					if err != nil {
 						return err
 					}
@@ -258,11 +284,31 @@ func decrypt() cli.Command {
 						Usage:       "the output file, stdout if empty",
 						Destination: &outputPath,
 					},
+					cli.StringFlag{
+						Name:        "vaultURL",
+						Value:       "",
+						Usage:       "Azure vault URL",
+						Destination: &azureVaultURL,
+					},
+					cli.StringFlag{
+						Name:        "name",
+						Value:       "",
+						Usage:       "the key name",
+						Destination: &azureKeyName,
+					},
+					cli.StringFlag{
+						Name:        "version",
+						Value:       "",
+						Usage:       "the key version",
+						Destination: &azureKeyVersion,
+					},
 				},
 				Action: func(c *cli.Context) error {
 					crypt := crypto.NewCrypt(azure.NewAzureKMS())
 					params := map[string]interface{}{
-						// TODO add necessary params
+						azure.VaultURL: azureVaultURL,
+						azure.Name:     azureKeyName,
+						azure.Version:  azureKeyVersion,
 					}
 					err := crypt.DecryptFile(inputPath, outputPath, params)
 					if err != nil {
