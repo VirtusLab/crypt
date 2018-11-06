@@ -6,7 +6,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
 	log "github.com/sirupsen/logrus"
 
-	"aurora-tool/_vendor-20180329085108/github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"context"
 	"encoding/base64"
 )
