@@ -9,13 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	// KMS - this is constant used in params
-	KMS = "kms"
-	// Region - this is constant used in params
-	Region = "region"
-)
-
 var (
 	// ErrKmsMissing - this is the custom error, returned when name, alias or arn is missing
 	ErrKmsMissing = errors.New("kms is empty or missing")
@@ -24,26 +17,29 @@ var (
 )
 
 // AmazonKMS struct represents AWS Key Management Service
-type AmazonKMS struct{}
+type AmazonKMS struct {
+	key    string
+	region string
+}
 
 // NewAmazonKMS creates AWS KMS
-func NewAmazonKMS() *AmazonKMS {
-	return &AmazonKMS{}
+func NewAmazonKMS(key, region string) *AmazonKMS {
+	return &AmazonKMS{
+		key:    key,
+		region: region,
+	}
 }
 
 // Encrypt is responsible for encrypting plaintext and returning ciphertext in bytes using AWS KMS.
-// All configuration is passed in params with according validation.
 // See Crypt.EncryptFile
-func (a *AmazonKMS) Encrypt(plaintext []byte, params map[string]interface{}) ([]byte, error) {
-	awsKms := params[KMS].(string)
-	if len(awsKms) == 0 {
-		logrus.Debugf("Error reading kms: %v", awsKms)
+func (a *AmazonKMS) Encrypt(plaintext []byte) ([]byte, error) {
+	if len(a.key) == 0 {
+		logrus.Debugf("Error reading kms: %v", a.key)
 		return nil, ErrKmsMissing
 	}
 
-	region := params[Region].(string)
-	if len(region) == 0 {
-		logrus.Debugf("Error reading region: %v", region)
+	if len(a.region) == 0 {
+		logrus.Debugf("Error reading region: %v", a.region)
 		return nil, ErrRegionMissing
 	}
 
@@ -52,12 +48,12 @@ func (a *AmazonKMS) Encrypt(plaintext []byte, params map[string]interface{}) ([]
 	// If not set and environment variables are not set the "default"
 	// ill be used as the profile to load the session config from.
 	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
-		Config: aws.Config{Region: aws.String(params[Region].(string))},
+		Config: aws.Config{Region: aws.String(a.region)},
 	}))
-	svc := kms.New(awsSession, aws.NewConfig().WithRegion(params[Region].(string)))
+	svc := kms.New(awsSession, aws.NewConfig().WithRegion(a.region))
 	input := &kms.EncryptInput{
 		Plaintext: plaintext,
-		KeyId:     aws.String(params[KMS].(string)),
+		KeyId:     aws.String(a.key),
 	}
 	output, err := svc.Encrypt(input)
 	if err != nil {
@@ -67,12 +63,10 @@ func (a *AmazonKMS) Encrypt(plaintext []byte, params map[string]interface{}) ([]
 }
 
 // Decrypt is responsible for decrypting ciphertext and returning plaintext in bytes using AWS KMS.
-// All configuration is passed in params with according validation.
 // See Crypt.DecryptFile
-func (a *AmazonKMS) Decrypt(ciphertext []byte, params map[string]interface{}) ([]byte, error) {
-	region := params[Region].(string)
-	if len(region) == 0 {
-		logrus.Debugf("Error reading region: %v", region)
+func (a *AmazonKMS) Decrypt(ciphertext []byte) ([]byte, error) {
+	if len(a.region) == 0 {
+		logrus.Debugf("Error reading region: %v", a.region)
 		return nil, ErrRegionMissing
 	}
 
@@ -81,7 +75,7 @@ func (a *AmazonKMS) Decrypt(ciphertext []byte, params map[string]interface{}) ([
 	// If not set and environment variables are not set the "default"
 	// ill be used as the profile to load the session config from.
 	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
-		Config: aws.Config{Region: aws.String(params[Region].(string))},
+		Config: aws.Config{Region: aws.String(a.region)},
 	}))
 	svc := kms.New(awsSession)
 	input := &kms.DecryptInput{

@@ -6,6 +6,7 @@ PATH  := $(GOPATH)/bin:$(PATH)
 # You can change the default config with `make config="config_special.env" build`
 config ?= config.env
 include $(config)
+export
 
 # Set an output prefix, which is the local directory if not specified
 PREFIX?=$(shell pwd)
@@ -85,6 +86,11 @@ lint: ## Verifies `golint` passes
 test: ## Runs the go tests
 	@echo "+ $@"
 	@go test -v -tags "$(BUILDTAGS) cgo" $(shell go list ./... | grep -v vendor)
+
+.PHONY: integrationtest
+integrationtest: ## Runs the go tests
+	@echo "+ $@"
+	@go test -v -tags "$(BUILDTAGS) cgo integration" $(shell go list ./... | grep -v vendor)
 
 .PHONY: vet
 vet: ## Verifies `go vet` passes

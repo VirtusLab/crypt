@@ -18,13 +18,13 @@ func NewCrypt(kms KMS) *Crypt {
 // EncryptFile reads from the inputPath file or stdin if empty.
 // Then encrypts content with corresponding Key Management Service.
 // Ciphertext is saved into outputPath file or print on stdout if empty.
-func (c *Crypt) EncryptFile(inputPath, outputPath string, params map[string]interface{}) error {
+func (c *Crypt) EncryptFile(inputPath, outputPath string) error {
 	input, err := files.ReadInput(inputPath)
 	if err != nil {
 		logrus.Debugf("Can't open plaintext file: %v", err)
 		return err
 	}
-	result, err := c.kms.Encrypt(input, params)
+	result, err := c.kms.Encrypt(input)
 	if err != nil {
 		logrus.Debugf("Encrypting failed: %s", err)
 		return err
@@ -40,13 +40,13 @@ func (c *Crypt) EncryptFile(inputPath, outputPath string, params map[string]inte
 // DecryptFile reads from the inputPath file or stdin if empty.
 // Then decrypts content with corresponding Key Management Service.
 // Plaintext is saved into outputPath file or print on stdout if empty.
-func (c *Crypt) DecryptFile(inputPath, outputPath string, params map[string]interface{}) error {
+func (c *Crypt) DecryptFile(inputPath, outputPath string) error {
 	input, err := files.ReadInput(inputPath)
 	if err != nil {
 		logrus.Debugf("Can't open encrypted file: %v", err)
 		return err
 	}
-	result, err := c.kms.Decrypt(input, params)
+	result, err := c.kms.Decrypt(input)
 	if err != nil {
 		logrus.Debugf("Decrypting failed: %s", err)
 		return err

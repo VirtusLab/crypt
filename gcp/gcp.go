@@ -11,17 +11,6 @@ import (
 	"google.golang.org/api/cloudkms/v1"
 )
 
-const (
-	// Project - this is constant used in params
-	Project = "project"
-	// Location - this is constant used in params
-	Location = "location"
-	// KeyRing - this is constant used in params
-	KeyRing = "keyring"
-	// Key - this is constant used in params
-	Key = "key"
-)
-
 var (
 	// ErrProjectMissing - this is the custom error, returned when project is missing
 	ErrProjectMissing = errors.New("project is empty or missing")
@@ -33,19 +22,28 @@ var (
 	ErrKeyMissing = errors.New("key is empty or missing")
 )
 
-// GoogleKMS struct represents GCP Key Management Service
-type GoogleKMS struct{}
+// GoogleKMS provides a way to encrypt and decrypt the data using GCP KMS.
+type GoogleKMS struct {
+	project  string
+	location string
+	keyring  string
+	key      string
+}
 
 // NewGoogleKMS new GCP KMS
-func NewGoogleKMS() *GoogleKMS {
-	return &GoogleKMS{}
+func NewGoogleKMS(project, location, keyring, key string) *GoogleKMS {
+	return &GoogleKMS{
+		project:  project,
+		location: location,
+		keyring:  keyring,
+		key:      key,
+	}
 }
 
 // Encrypt is responsible for encrypting plaintext and returning ciphertext in bytes using GCP KMS.
-// All configuration is passed in params with according validation.
 // See Crypt.EncryptFile
-func (g *GoogleKMS) Encrypt(plaintext []byte, params map[string]interface{}) ([]byte, error) {
-	err := validateParams(params)
+func (g *GoogleKMS) Encrypt(plaintext []byte) ([]byte, error) {
+	err := g.validateParams()
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +63,7 @@ func (g *GoogleKMS) Encrypt(plaintext []byte, params map[string]interface{}) ([]
 	}
 
 	parentName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-		params[Project], params[Location], params[KeyRing], params[Key])
+		g.project, g.location, g.keyring, g.key)
 
 	req := &cloudkms.EncryptRequest{
 		Plaintext: base64.StdEncoding.EncodeToString(plaintext),
@@ -79,10 +77,9 @@ func (g *GoogleKMS) Encrypt(plaintext []byte, params map[string]interface{}) ([]
 }
 
 // Decrypt is responsible for decrypting ciphertext and returning plaintext in bytes using GCP KMS.
-// All configuration is passed in params with according validation.
 // See Crypt.DecryptFile
-func (g *GoogleKMS) Decrypt(ciphertext []byte, params map[string]interface{}) ([]byte, error) {
-	err := validateParams(params)
+func (g *GoogleKMS) Decrypt(ciphertext []byte) ([]byte, error) {
+	err := g.validateParams()
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +99,7 @@ func (g *GoogleKMS) Decrypt(ciphertext []byte, params map[string]interface{}) ([
 	}
 
 	parentName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-		params[Project], params[Location], params[KeyRing], params[Key])
+		g.project, g.location, g.keyring, g.key)
 
 	req := &cloudkms.DecryptRequest{
 		Ciphertext: base64.StdEncoding.EncodeToString(ciphertext),
@@ -114,25 +111,21 @@ func (g *GoogleKMS) Decrypt(ciphertext []byte, params map[string]interface{}) ([
 	return base64.StdEncoding.DecodeString(resp.Plaintext)
 }
 
-func validateParams(params map[string]interface{}) error {
-	project := params[Project].(string)
-	if len(project) == 0 {
-		logrus.Debugf("Error reading project: %v", project)
+func (g *GoogleKMS) validateParams() error {
+	if len(g.project) == 0 {
+		logrus.Debugf("Error reading project: %v", g.project)
 		return ErrProjectMissing
 	}
-	location := params[Location].(string)
-	if len(location) == 0 {
-		logrus.Debugf("Error reading location: %v", location)
+	if len(g.location) == 0 {
+		logrus.Debugf("Error reading location: %v", g.location)
 		return ErrLocationMissing
 	}
-	keyring := params[KeyRing].(string)
-	if len(keyring) == 0 {
-		logrus.Debugf("Error reading keyring: %v", keyring)
+	if len(g.keyring) == 0 {
+		logrus.Debugf("Error reading keyring: %v", g.keyring)
 		return ErrKeyRingMissing
 	}
-	key := params[Key].(string)
-	if len(key) == 0 {
-		logrus.Debugf("Error reading key: %v", key)
+	if len(g.key) == 0 {
+		logrus.Debugf("Error reading key: %v", g.key)
 		return ErrKeyMissing
 	}
 	return nil

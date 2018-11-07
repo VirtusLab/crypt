@@ -2,93 +2,92 @@ package azure
 
 import (
 	"errors"
-	"github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault"
-	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
-	log "github.com/sirupsen/logrus"
-
-	"github.com/sirupsen/logrus"
 	"context"
 	"encoding/base64"
+
+	"github.com/sirupsen/logrus"
+	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
+	"github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault"
 )
 
-const (
-	// VaultURL - the vault url (example: https://myvault.vault.azure.net/)
-	VaultURL = "vaultURL"
-	// Name - the name of the key
-	Name = "name"
-	// Version - the version of the key (example: 1d40f45795a444099c81ca274b88c141)
-	Version = "version"
+var (
+	// ErrVaultURLMissing - this is the custom error, returned when vault url is missing
+	ErrVaultURLMissing = errors.New("vault url is empty or missing")
+	// ErrKeyMissing = this is the custom error, returned when the key is missing
+	ErrKeyMissing = errors.New("key is empty or missing")
+	// ErrKeyVersionMissing = this is the custom error, returned when the key version is missing
+	ErrKeyVersionMissing = errors.New("key version is empty or missing")
 )
 
 // AzureKMS struct represents Azure Key Vault
-type AzureKMS struct{}
+type AzureKMS struct {
+	vaultURL   string
+	key        string
+	keyVersion string
+}
 
-// Constructor for AzureKMS
-func NewAzureKMS() *AzureKMS {
-	return &AzureKMS{}
+// NewAzureKMS creates Azure Key Vault KMS
+func NewAzureKMS(vaultURL, key, keyVersion string) *AzureKMS {
+	return &AzureKMS{
+		vaultURL:   vaultURL,
+		key:        key,
+		keyVersion: keyVersion,
+	}
 }
 
 func newKeyVaultClient() (keyvault.BaseClient, error) {
 	var err error
-	keyvaultClient := keyvault.New()
-	keyvaultClient.Authorizer, err = auth.NewAuthorizerFromEnvironment()
+	vaultClient := keyvault.New()
+	vaultClient.Authorizer, err = auth.NewAuthorizerFromEnvironment()
 	if err != nil {
-		log.WithError(err).Error("Failed to create Azure Authorizer")
-		return keyvaultClient, err
+		logrus.WithError(err).Error("Failed to create Azure Authorizer")
+		return vaultClient, err
 	}
-	return keyvaultClient, nil
+	return vaultClient, nil
 }
 
 // Encrypt is responsible for encrypting plaintext by Azure Key Vault encryption key and returning ciphertext in bytes.
-// All configuration is passed in params with according validation.
 // See Crypt.EncryptFile
-func (a *AzureKMS) Encrypt(plaintext []byte, params map[string]interface{}) ([]byte, error) {
-	err := validateParams(params)
+func (a *AzureKMS) Encrypt(plaintext []byte) ([]byte, error) {
+	err := a.validateParams()
 	if err != nil {
 		return nil, err
 	}
-	c, err := newKeyVaultClient()
+
+	client, err := newKeyVaultClient()
 	if err != nil {
 		return nil, err
 	}
 	data := base64.RawURLEncoding.EncodeToString(plaintext)
 	p := keyvault.KeyOperationsParameters{Value: &data, Algorithm: keyvault.RSAOAEP256}
 
-	res, err := c.Encrypt(context.Background(),
-		params[VaultURL].(string),
-		params[Name].(string),
-		params[Version].(string),
-		p)
-
+	ctx := context.Background()
+	res, err := client.Encrypt(ctx, a.vaultURL, a.key, a.keyVersion, p)
 	if err != nil {
 		return nil, err
 	}
 
 	result, err := base64.RawURLEncoding.DecodeString(*res.Result)
-	log.WithFields(log.Fields{
-		"key":     params[Name].(string),
-		"version": params[Version].(string),
+	logrus.WithFields(logrus.Fields{
+		"key":        a.key,
+		"keyVersion": a.keyVersion,
 	}).Info("Encryption succeeded")
 	return result, nil
 }
 
 // Decrypt is responsible for decrypting ciphertext by Azure Key Vault encryption key and returning plaintext in bytes.
-// All configuration is passed in params with according validation.
 // See Crypt.EncryptFile
-func (a *AzureKMS) Decrypt(ciphertext []byte, params map[string]interface{}) ([]byte, error) {
-	c, err := newKeyVaultClient()
+func (a *AzureKMS) Decrypt(ciphertext []byte) ([]byte, error) {
+	// FIXME a.validateParams()
+	client, err := newKeyVaultClient()
 	if err != nil {
 		return nil, err
 	}
 	data := base64.RawURLEncoding.EncodeToString(ciphertext)
 	p := keyvault.KeyOperationsParameters{Value: &data, Algorithm: keyvault.RSAOAEP256}
 
-	res, err := c.Decrypt(context.TODO(),
-		params[VaultURL].(string),
-		params[Name].(string),
-		params[Version].(string),
-		p)
-
+	ctx := context.Background()
+	res, err := client.Decrypt(ctx, a.vaultURL, a.key, a.keyVersion, p)
 	if err != nil {
 		return nil, err
 	}
@@ -98,31 +97,26 @@ func (a *AzureKMS) Decrypt(ciphertext []byte, params map[string]interface{}) ([]
 		return nil, err
 	}
 
-	log.WithFields(log.Fields{
-		"key":     params[Name].(string),
-		"version": params[Version].(string),
+	logrus.WithFields(logrus.Fields{
+		"key":        a.key,
+		"keyVersion": a.keyVersion,
 	}).Info("Decryption succeeded")
+
 	return plaintext, nil
 }
 
-func validateParams(params map[string]interface{}) error {
-	vaultURL := params[VaultURL].(string)
-	if len(vaultURL) == 0 {
-		logrus.Debugf("Error reading vaultURL: %v", vaultURL)
-		return errors.New("vaultURL is empty or missing!")
+func (a *AzureKMS) validateParams() error {
+	if len(a.vaultURL) == 0 {
+		logrus.Debugf("Error reading vaultURL: %v", a.vaultURL)
+		return ErrVaultURLMissing
 	}
-
-	name := params[Name].(string)
-	if len(name) == 0 {
-		logrus.Debugf("Error reading name: %v", name)
-		return errors.New("name is empty or missing!")
+	if len(a.key) == 0 {
+		logrus.Debugf("Error reading key: %v", a.key)
+		return ErrKeyMissing
 	}
-
-	version := params[Version].(string)
-	if len(version) == 0 {
-		logrus.Debugf("Error reading version: %v", version)
-		return errors.New("version is empty or missing!")
+	if len(a.keyVersion) == 0 {
+		logrus.Debugf("Error reading keyVersion: %v", a.keyVersion)
+		return ErrKeyVersionMissing
 	}
-
 	return nil
 }

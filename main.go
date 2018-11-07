@@ -21,7 +21,7 @@ var (
 
 	// Azure kms
 	azureVaultURL   string
-	azureKeyName    string
+	azureKey        string
 	azureKeyVersion string
 
 	// GCP Cloud KMS resources belong to a project
@@ -136,7 +136,7 @@ func encrypt() cli.Command {
 						Name:        "name",
 						Value:       "",
 						Usage:       "the key name",
-						Destination: &azureKeyName,
+						Destination: &azureKey,
 					},
 					cli.StringFlag{
 						Name:        "version",
@@ -146,14 +146,9 @@ func encrypt() cli.Command {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					crypt := crypto.NewCrypt(azure.NewAzureKMS())
-					params := map[string]interface{}{
-						azure.VaultURL: azureVaultURL,
-						azure.Name:     azureKeyName,
-						azure.Version:  azureKeyVersion,
-					}
-					err := crypt.EncryptFile(inputPath, outputPath, params)
-
+					azureKms := azure.NewAzureKMS(azureVaultURL, azureKey, azureKeyVersion)
+					crypt := crypto.NewCrypt(azureKms)
+					err := crypt.EncryptFile(inputPath, outputPath)
 					if err != nil {
 						return err
 					}
@@ -190,12 +185,9 @@ func encrypt() cli.Command {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					crypt := crypto.NewCrypt(aws.NewAmazonKMS())
-					params := map[string]interface{}{
-						aws.KMS:    awsKms,
-						aws.Region: awsRegion,
-					}
-					err := crypt.EncryptFile(inputPath, outputPath, params)
+					amazonKms := aws.NewAmazonKMS(awsKms, awsRegion)
+					crypt := crypto.NewCrypt(amazonKms)
+					err := crypt.EncryptFile(inputPath, outputPath)
 					if err != nil {
 						return err
 					}
@@ -244,14 +236,9 @@ func encrypt() cli.Command {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					crypt := crypto.NewCrypt(gcp.NewGoogleKMS())
-					params := map[string]interface{}{
-						gcp.Project:  gcpProject,
-						gcp.Location: gcpLocation,
-						gcp.KeyRing:  gcpKeyring,
-						gcp.Key:      gcpKey,
-					}
-					err := crypt.EncryptFile(inputPath, outputPath, params)
+					googleKms := gcp.NewGoogleKMS(gcpProject, gcpLocation, gcpKeyring, gcpKey)
+					crypt := crypto.NewCrypt(googleKms)
+					err := crypt.EncryptFile(inputPath, outputPath)
 					if err != nil {
 						return err
 					}
@@ -294,7 +281,7 @@ func decrypt() cli.Command {
 						Name:        "name",
 						Value:       "",
 						Usage:       "the key name",
-						Destination: &azureKeyName,
+						Destination: &azureKey,
 					},
 					cli.StringFlag{
 						Name:        "version",
@@ -304,13 +291,9 @@ func decrypt() cli.Command {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					crypt := crypto.NewCrypt(azure.NewAzureKMS())
-					params := map[string]interface{}{
-						azure.VaultURL: azureVaultURL,
-						azure.Name:     azureKeyName,
-						azure.Version:  azureKeyVersion,
-					}
-					err := crypt.DecryptFile(inputPath, outputPath, params)
+					azureKms := azure.NewAzureKMS(azureVaultURL, azureKey, azureKeyVersion)
+					crypt := crypto.NewCrypt(azureKms)
+					err := crypt.DecryptFile(inputPath, outputPath)
 					if err != nil {
 						return err
 					}
@@ -341,12 +324,9 @@ func decrypt() cli.Command {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					crypt := crypto.NewCrypt(aws.NewAmazonKMS())
-					params := map[string]interface{}{
-						aws.KMS:    awsKms,
-						aws.Region: awsRegion,
-					}
-					err := crypt.DecryptFile(inputPath, outputPath, params)
+					amazonKms := aws.NewAmazonKMS(awsKms, awsRegion)
+					crypt := crypto.NewCrypt(amazonKms)
+					err := crypt.DecryptFile(inputPath, outputPath)
 					if err != nil {
 						return err
 					}
@@ -395,14 +375,9 @@ func decrypt() cli.Command {
 					},
 				},
 				Action: func(c *cli.Context) error {
-					crypt := crypto.NewCrypt(gcp.NewGoogleKMS())
-					params := map[string]interface{}{
-						gcp.Project:  gcpProject,
-						gcp.Location: gcpLocation,
-						gcp.KeyRing:  gcpKeyring,
-						gcp.Key:      gcpKey,
-					}
-					err := crypt.DecryptFile(inputPath, outputPath, params)
+					googleKms := gcp.NewGoogleKMS(gcpProject, gcpLocation, gcpKeyring, gcpKey)
+					crypt := crypto.NewCrypt(googleKms)
+					err := crypt.DecryptFile(inputPath, outputPath)
 					if err != nil {
 						return err
 					}
