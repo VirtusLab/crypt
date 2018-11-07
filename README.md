@@ -150,6 +150,16 @@ Not supported yet. Stay tuned.
     cd $GOPATH/src/github.com/VirtusLab/crypt
     make all
 
+### Testing
+
+    make test
+
+### Integration testing
+
+Set up required environment variables in `config.env` and run:
+
+    make integrationtest
+
 ## The name
 
 We believe in obvious names. It encrypts and decrypts.
