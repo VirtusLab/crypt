@@ -3,6 +3,7 @@
 [![Version](https://img.shields.io/badge/version-v0.0.2-brightgreen.svg)](https://github.com/VirtusLab/crypt/releases/tag/v0.0.2)
 [![Travis CI](https://img.shields.io/travis/VirtusLab/crypt.svg)](https://travis-ci.org/VirtusLab/crypt)
 [![Github All Releases](https://img.shields.io/github/downloads/VirtusLab/crypt/total.svg)](https://github.com/VirtusLab/crypt/releases)
+[![Go Report Card](https://goreportcard.com/badge/github.com/VirtusLab/crypt "Go Report Card")](https://goreportcard.com/report/github.com/VirtusLab/crypt)
 
 Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
 
