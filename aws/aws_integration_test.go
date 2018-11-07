@@ -1,6 +1,6 @@
 // +build integration
 
-package gcp
+package aws
 
 import (
 	"os"
@@ -14,7 +14,7 @@ import (
 	"github.com/VirtusLab/crypt/crypto"
 )
 
-func TestEncryptDecryptWithGCP(t *testing.T) {
+func TestEncryptDecryptWithAWS(t *testing.T) {
 	type TestCase struct {
 		name    string
 		f       func(TestCase)
@@ -22,10 +22,8 @@ func TestEncryptDecryptWithGCP(t *testing.T) {
 	}
 
 	// configuration from config.env
-	projectId := os.Getenv("GCP_PROJECT_ID")
-	location := os.Getenv("GCP_LOCATION")
-	keyring := os.Getenv("GCP_KEY_RING")
-	key := os.Getenv("GCP_KEY")
+	key := os.Getenv("AWS_KEY")
+	region := os.Getenv("AWS_REGION")
 
 	when := func(crypt *crypto.Crypt, inputPath string) (string, error) {
 		defer os.Remove(inputPath + ".encrypted") // clean up
@@ -53,8 +51,8 @@ func TestEncryptDecryptWithGCP(t *testing.T) {
 		{
 			name: "encrypt decrypt file",
 			f: func(tc TestCase) {
-				googleKMS := NewGoogleKMS(projectId, location, keyring, key)
-				crypt := crypto.NewCrypt(googleKMS)
+				amazonKMS := NewAmazonKMS(key, region)
+				crypt := crypto.NewCrypt(amazonKMS)
 
 				inputFile := "test.txt"
 				expected := "top secret token"
