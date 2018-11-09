@@ -138,7 +138,44 @@ For more details run `crypt en gcp --help` or `crypt de gcp --help`
 
 ### Encryption using Azure Key Vault
 
-Not supported yet. Stay tuned.
+`crypt` uses [NewAuthorizerFromEnvironment](https://github.com/Azure/azure-sdk-for-go) from official [Microsoft Azure SDK for go](https://github.com/Azure/azure-sdk-for-go).
+
+#### Examples
+
+Example usage with file:
+
+    $ echo "top secret" > file.txt
+    $ crypt en gcp --in file.txt --out file.enc --vaultURL https://example-vault.vault.azure.net --name global --version 77ea..
+    $ crypt de gcp --in file.enc --out file.dec --vaultURL https://example-vault.vault.azure.net --name global --version 77ea..
+
+Example usage with stdin:
+
+    $ echo "top secret" | crypt en gcp --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
+
+
+For more details run `crypt en azure --help` or `crypt de azure --help`
+
+    NAME:
+       crypt encrypt azure - Encrypts files and/or strings with Azure Key Vault
+
+    USAGE:
+       crypt encrypt azure [command options] [arguments...]
+
+    OPTIONS:
+       --in value, --input value    the input file to decrypt, stdin if empty
+       --out value, --output value  the output file, stdout if empty
+       --vaultURL value             Azure vault URL
+       --name value                 the key name
+       --version value              the key version
+
+#### Useful links
+
+- [Azure Key Vault Documentation](https://docs.microsoft.com/en-us/azure/key-vault/)
+- [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
+
+## Contribution
+
+Feel free to file [issues](https://github.com/VirtusLab/crypt/issues) or [pull requests](https://github.com/VirtusLab/crypt/pulls).
 
 ## Development
 
