@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	"github.com/VirtusLab/crypt/crypto"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2/google"
@@ -22,17 +23,17 @@ var (
 	ErrKeyMissing = errors.New("key is empty or missing")
 )
 
-// GoogleKMS provides a way to encrypt and decrypt the data using GCP KMS.
-type GoogleKMS struct {
+// KMS provides a way to encrypt and decrypt the data using GCP KMS.
+type KMS struct {
 	project  string
 	location string
 	keyring  string
 	key      string
 }
 
-// NewGoogleKMS new GCP KMS
-func NewGoogleKMS(project, location, keyring, key string) *GoogleKMS {
-	return &GoogleKMS{
+// New new GCP KMS
+func New(project, location, keyring, key string) crypto.KMS {
+	return &KMS{
 		project:  project,
 		location: location,
 		keyring:  keyring,
@@ -41,9 +42,9 @@ func NewGoogleKMS(project, location, keyring, key string) *GoogleKMS {
 }
 
 // Encrypt is responsible for encrypting plaintext and returning ciphertext in bytes using GCP KMS.
-// See Crypt.EncryptFile
-func (g *GoogleKMS) Encrypt(plaintext []byte) ([]byte, error) {
-	err := g.validateParams()
+// See Crypt.Encrypt
+func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
+	err := k.validate()
 	if err != nil {
 		return nil, err
 	}
@@ -57,18 +58,18 @@ func (g *GoogleKMS) Encrypt(plaintext []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	cloudkmsService, err := cloudkms.New(client)
+	kmsService, err := cloudkms.New(client)
 	if err != nil {
 		return nil, err
 	}
 
 	parentName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-		g.project, g.location, g.keyring, g.key)
+		k.project, k.location, k.keyring, k.key)
 
 	req := &cloudkms.EncryptRequest{
 		Plaintext: base64.StdEncoding.EncodeToString(plaintext),
 	}
-	resp, err := cloudkmsService.Projects.Locations.KeyRings.CryptoKeys.Encrypt(parentName, req).Do()
+	resp, err := kmsService.Projects.Locations.KeyRings.CryptoKeys.Encrypt(parentName, req).Do()
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +79,8 @@ func (g *GoogleKMS) Encrypt(plaintext []byte) ([]byte, error) {
 
 // Decrypt is responsible for decrypting ciphertext and returning plaintext in bytes using GCP KMS.
 // See Crypt.DecryptFile
-func (g *GoogleKMS) Decrypt(ciphertext []byte) ([]byte, error) {
-	err := g.validateParams()
+func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
+	err := k.validate()
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +100,7 @@ func (g *GoogleKMS) Decrypt(ciphertext []byte) ([]byte, error) {
 	}
 
 	parentName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
-		g.project, g.location, g.keyring, g.key)
+		k.project, k.location, k.keyring, k.key)
 
 	req := &cloudkms.DecryptRequest{
 		Ciphertext: base64.StdEncoding.EncodeToString(ciphertext),
@@ -111,21 +112,21 @@ func (g *GoogleKMS) Decrypt(ciphertext []byte) ([]byte, error) {
 	return base64.StdEncoding.DecodeString(resp.Plaintext)
 }
 
-func (g *GoogleKMS) validateParams() error {
-	if len(g.project) == 0 {
-		logrus.Debugf("Error reading project: %v", g.project)
+func (k *KMS) validate() error {
+	if len(k.project) == 0 {
+		logrus.Debugf("Error reading project: %v", k.project)
 		return ErrProjectMissing
 	}
-	if len(g.location) == 0 {
-		logrus.Debugf("Error reading location: %v", g.location)
+	if len(k.location) == 0 {
+		logrus.Debugf("Error reading location: %v", k.location)
 		return ErrLocationMissing
 	}
-	if len(g.keyring) == 0 {
-		logrus.Debugf("Error reading keyring: %v", g.keyring)
+	if len(k.keyring) == 0 {
+		logrus.Debugf("Error reading keyring: %v", k.keyring)
 		return ErrKeyRingMissing
 	}
-	if len(g.key) == 0 {
-		logrus.Debugf("Error reading key: %v", g.key)
+	if len(k.key) == 0 {
+		logrus.Debugf("Error reading key: %v", k.key)
 		return ErrKeyMissing
 	}
 	return nil

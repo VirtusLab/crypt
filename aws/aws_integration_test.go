@@ -3,15 +3,15 @@
 package aws
 
 import (
-	"os"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/VirtusLab/crypt/crypto"
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
-	"github.com/VirtusLab/crypt/crypto"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEncryptDecryptWithAWS(t *testing.T) {
@@ -51,8 +51,8 @@ func TestEncryptDecryptWithAWS(t *testing.T) {
 		{
 			name: "encrypt decrypt file",
 			f: func(tc TestCase) {
-				amazonKMS := NewAmazonKMS(key, region)
-				crypt := crypto.NewCrypt(amazonKMS)
+				amazon := New(key, region)
+				crypt := crypto.New(amazon)
 
 				inputFile := "test.txt"
 				expected := "top secret token"

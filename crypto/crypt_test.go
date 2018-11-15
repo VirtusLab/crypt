@@ -1,9 +1,9 @@
 package crypto
 
 import (
-	"os"
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/sirupsen/logrus"
@@ -75,8 +75,8 @@ func TestCrypt(t *testing.T) {
 					return ciphertext, nil
 				}
 
-				fakeKMS := NewFakeKMS(encrypt, decrypt)
-				crypt := NewCrypt(fakeKMS)
+				fake := NewFakeKMS(encrypt, decrypt)
+				crypt := New(fake)
 
 				inputFile := "test.txt"
 				expected := "top secret token"
@@ -88,6 +88,7 @@ func TestCrypt(t *testing.T) {
 
 				actual, err := when(crypt, inputFile)
 
+				assert.NoError(t, err, tc.name)
 				assert.Equal(t, expected, string(actual))
 			},
 		},
@@ -104,7 +105,7 @@ func TestCrypt(t *testing.T) {
 				}
 
 				fakeKMS := NewFakeKMS(encrypt, decrypt)
-				crypt := NewCrypt(fakeKMS)
+				crypt := New(fakeKMS)
 
 				inputFile := "test.txt"
 

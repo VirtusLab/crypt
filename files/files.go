@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	// ErrExpectedStdin indicates that an stdin pipe was expected but not present
 	ErrExpectedStdin = errors.New("expected a pipe stdin")
 )
 

@@ -1,13 +1,14 @@
 package azure
 
 import (
-	"errors"
 	"context"
 	"encoding/base64"
+	"errors"
 
-	"github.com/sirupsen/logrus"
-	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault"
+	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
+	"github.com/VirtusLab/crypt/crypto"
+	"github.com/sirupsen/logrus"
 )
 
 var (
@@ -19,16 +20,16 @@ var (
 	ErrKeyVersionMissing = errors.New("key version is empty or missing")
 )
 
-// AzureKMS struct represents Azure Key Vault
-type AzureKMS struct {
+// KMS struct represents Azure Key Vault
+type KMS struct {
 	vaultURL   string
 	key        string
 	keyVersion string
 }
 
-// NewAzureKMS creates Azure Key Vault KMS
-func NewAzureKMS(vaultURL, key, keyVersion string) *AzureKMS {
-	return &AzureKMS{
+// New creates Azure Key Vault KMS
+func New(vaultURL, key, keyVersion string) crypto.KMS {
+	return &KMS{
 		vaultURL:   vaultURL,
 		key:        key,
 		keyVersion: keyVersion,
@@ -46,10 +47,10 @@ func newKeyVaultClient() (keyvault.BaseClient, error) {
 	return vaultClient, nil
 }
 
-// Encrypt is responsible for encrypting plaintext by Azure Key Vault encryption key and returning ciphertext in bytes.
-// See Crypt.EncryptFile
-func (a *AzureKMS) Encrypt(plaintext []byte) ([]byte, error) {
-	err := a.validateParams()
+// Encrypt is encrypts plaintext using Azure Key Vault and returns ciphertext
+// See Crypt.Encrypt
+func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
+	err := k.validate()
 	if err != nil {
 		return nil, err
 	}
@@ -62,23 +63,26 @@ func (a *AzureKMS) Encrypt(plaintext []byte) ([]byte, error) {
 	p := keyvault.KeyOperationsParameters{Value: &data, Algorithm: keyvault.RSAOAEP256}
 
 	ctx := context.Background()
-	res, err := client.Encrypt(ctx, a.vaultURL, a.key, a.keyVersion, p)
+	res, err := client.Encrypt(ctx, k.vaultURL, k.key, k.keyVersion, p)
 	if err != nil {
 		return nil, err
 	}
 
 	result, err := base64.RawURLEncoding.DecodeString(*res.Result)
+	if err != nil {
+		return nil, err
+	}
 	logrus.WithFields(logrus.Fields{
-		"key":        a.key,
-		"keyVersion": a.keyVersion,
+		"key":        k.key,
+		"keyVersion": k.keyVersion,
 	}).Info("Encryption succeeded")
 	return result, nil
 }
 
 // Decrypt is responsible for decrypting ciphertext by Azure Key Vault encryption key and returning plaintext in bytes.
 // See Crypt.EncryptFile
-func (a *AzureKMS) Decrypt(ciphertext []byte) ([]byte, error) {
-	// FIXME a.validateParams()
+func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
+	// FIXME k.validateParams()
 	client, err := newKeyVaultClient()
 	if err != nil {
 		return nil, err
@@ -87,7 +91,7 @@ func (a *AzureKMS) Decrypt(ciphertext []byte) ([]byte, error) {
 	p := keyvault.KeyOperationsParameters{Value: &data, Algorithm: keyvault.RSAOAEP256}
 
 	ctx := context.Background()
-	res, err := client.Decrypt(ctx, a.vaultURL, a.key, a.keyVersion, p)
+	res, err := client.Decrypt(ctx, k.vaultURL, k.key, k.keyVersion, p)
 	if err != nil {
 		return nil, err
 	}
@@ -98,24 +102,24 @@ func (a *AzureKMS) Decrypt(ciphertext []byte) ([]byte, error) {
 	}
 
 	logrus.WithFields(logrus.Fields{
-		"key":        a.key,
-		"keyVersion": a.keyVersion,
+		"key":        k.key,
+		"keyVersion": k.keyVersion,
 	}).Info("Decryption succeeded")
 
 	return plaintext, nil
 }
 
-func (a *AzureKMS) validateParams() error {
-	if len(a.vaultURL) == 0 {
-		logrus.Debugf("Error reading vaultURL: %v", a.vaultURL)
+func (k *KMS) validate() error {
+	if len(k.vaultURL) == 0 {
+		logrus.Debugf("Error reading vaultURL: %v", k.vaultURL)
 		return ErrVaultURLMissing
 	}
-	if len(a.key) == 0 {
-		logrus.Debugf("Error reading key: %v", a.key)
+	if len(k.key) == 0 {
+		logrus.Debugf("Error reading key: %v", k.key)
 		return ErrKeyMissing
 	}
-	if len(a.keyVersion) == 0 {
-		logrus.Debugf("Error reading keyVersion: %v", a.keyVersion)
+	if len(k.keyVersion) == 0 {
+		logrus.Debugf("Error reading keyVersion: %v", k.keyVersion)
 		return ErrKeyVersionMissing
 	}
 	return nil

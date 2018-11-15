@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -145,15 +146,7 @@ func encrypt() cli.Command {
 						Destination: &azureKeyVersion,
 					},
 				},
-				Action: func(c *cli.Context) error {
-					azureKms := azure.NewAzureKMS(azureVaultURL, azureKey, azureKeyVersion)
-					crypt := crypto.NewCrypt(azureKms)
-					err := crypt.EncryptFile(inputPath, outputPath)
-					if err != nil {
-						return err
-					}
-					return nil
-				},
+				Action: encryptAzure,
 			},
 			{
 				Name:  "aws",
@@ -184,15 +177,7 @@ func encrypt() cli.Command {
 						Destination: &awsKms, // FIXME #2 make this flag required
 					},
 				},
-				Action: func(c *cli.Context) error {
-					amazonKms := aws.NewAmazonKMS(awsKms, awsRegion)
-					crypt := crypto.NewCrypt(amazonKms)
-					err := crypt.EncryptFile(inputPath, outputPath)
-					if err != nil {
-						return err
-					}
-					return nil
-				},
+				Action: encryptAws,
 			},
 			{
 				Name:  "gcp",
@@ -235,18 +220,40 @@ func encrypt() cli.Command {
 						Destination: &gcpKey, // FIXME #2 make this flag required
 					},
 				},
-				Action: func(c *cli.Context) error {
-					googleKms := gcp.NewGoogleKMS(gcpProject, gcpLocation, gcpKeyring, gcpKey)
-					crypt := crypto.NewCrypt(googleKms)
-					err := crypt.EncryptFile(inputPath, outputPath)
-					if err != nil {
-						return err
-					}
-					return nil
-				},
+				Action: encryptGcp,
 			},
 		},
 	}
+}
+
+func encryptAzure(_ *cli.Context) error {
+	azr := azure.New(azureVaultURL, azureKey, azureKeyVersion)
+	crypt := crypto.New(azr)
+	err := crypt.EncryptFile(inputPath, outputPath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func encryptAws(_ *cli.Context) error {
+	amazon := aws.New(awsKms, awsRegion)
+	crypt := crypto.New(amazon)
+	err := crypt.EncryptFile(inputPath, outputPath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func encryptGcp(_ *cli.Context) error {
+	google := gcp.New(gcpProject, gcpLocation, gcpKeyring, gcpKey)
+	crypt := crypto.New(google)
+	err := crypt.EncryptFile(inputPath, outputPath)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func decrypt() cli.Command {
@@ -290,15 +297,7 @@ func decrypt() cli.Command {
 						Destination: &azureKeyVersion,
 					},
 				},
-				Action: func(c *cli.Context) error {
-					azureKms := azure.NewAzureKMS(azureVaultURL, azureKey, azureKeyVersion)
-					crypt := crypto.NewCrypt(azureKms)
-					err := crypt.DecryptFile(inputPath, outputPath)
-					if err != nil {
-						return err
-					}
-					return nil
-				},
+				Action: decryptAzure,
 			},
 			{
 				Name:  "aws",
@@ -319,18 +318,15 @@ func decrypt() cli.Command {
 					cli.StringFlag{
 						Name:        "region",
 						Value:       "",
-						Usage:       "the AWS region",
-						Destination: &awsRegion, // FIXME #2 make this flag required
+						Usage:       "(required) the AWS region",
+						Destination: &awsRegion,
 					},
 				},
 				Action: func(c *cli.Context) error {
-					amazonKms := aws.NewAmazonKMS(awsKms, awsRegion)
-					crypt := crypto.NewCrypt(amazonKms)
-					err := crypt.DecryptFile(inputPath, outputPath)
-					if err != nil {
-						return err
+					if len(awsRegion) == 0 {
+						return errors.New("pass the AWS region")
 					}
-					return nil
+					return decryptAws(c)
 				},
 			},
 			{
@@ -374,16 +370,38 @@ func decrypt() cli.Command {
 						Destination: &gcpKey, // FIXME #2 make this flag required
 					},
 				},
-				Action: func(c *cli.Context) error {
-					googleKms := gcp.NewGoogleKMS(gcpProject, gcpLocation, gcpKeyring, gcpKey)
-					crypt := crypto.NewCrypt(googleKms)
-					err := crypt.DecryptFile(inputPath, outputPath)
-					if err != nil {
-						return err
-					}
-					return nil
-				},
+				Action: decryptGcp,
 			},
 		},
 	}
+}
+
+func decryptAzure(_ *cli.Context) error {
+	azr := azure.New(azureVaultURL, azureKey, azureKeyVersion)
+	crypt := crypto.New(azr)
+	err := crypt.DecryptFile(inputPath, outputPath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func decryptAws(_ *cli.Context) error {
+	amazon := aws.New(awsKms, awsRegion)
+	crypt := crypto.New(amazon)
+	err := crypt.DecryptFile(inputPath, outputPath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func decryptGcp(_ *cli.Context) error {
+	googleKms := gcp.New(gcpProject, gcpLocation, gcpKeyring, gcpKey)
+	crypt := crypto.New(googleKms)
+	err := crypt.DecryptFile(inputPath, outputPath)
+	if err != nil {
+		return err
+	}
+	return nil
 }

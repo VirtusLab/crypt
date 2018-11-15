@@ -3,15 +3,15 @@
 package gcp
 
 import (
-	"os"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/VirtusLab/crypt/crypto"
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
-	"github.com/VirtusLab/crypt/crypto"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestEncryptDecryptWithGCP(t *testing.T) {
@@ -53,8 +53,8 @@ func TestEncryptDecryptWithGCP(t *testing.T) {
 		{
 			name: "encrypt decrypt file",
 			f: func(tc TestCase) {
-				googleKMS := NewGoogleKMS(projectId, location, keyring, key)
-				crypt := crypto.NewCrypt(googleKMS)
+				google := New(projectId, location, keyring, key)
+				crypt := crypto.New(google)
 
 				inputFile := "test.txt"
 				expected := "top secret token"
