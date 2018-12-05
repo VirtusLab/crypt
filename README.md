@@ -12,16 +12,11 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
   * [Via Go](README.md#via-go)
 * [Usage](README.md#usage)
   * [Encryption using AWS KMS](README.md#encryption-using-aws-kms)
-    * [Examples](README.md#examples)
-    * [Useful links](README.md#useful-links)
   * [Encryption using GCP KMS](README.md#encryption-using-gcp-kms)
-    * [Examples](README.md#examples-1)
-    * [Useful links](README.md#useful-links-1)
   * [Encryption using Azure Key Vault](README.md#encryption-using-azure-key-vault)
-    * [Examples](README.md#examples-1)
-    * [Useful links](README.md#useful-links-1)
 * [Development](README.md#development)
-* [The Name](README.md#the-name)
+* [Contribution](README.md#contribution)
+
 
 ## Installation
 
@@ -59,123 +54,48 @@ For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt
 
 ### Encryption using AWS KMS
 
-`crypt` uses client from [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/).
-You can either run `aws configure` (if you don't have ~/.aws/credentials already) or set [environment variables](https://docs.aws.amazon.com/sdk-for-go/api/aws/session).
-
-#### Examples
+AWS KMS uses client from [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/).
+You can either run `aws configure` (if you don't have `~/.aws/credentials` already) or set [environment variables](https://docs.aws.amazon.com/sdk-for-go/api/aws/session).
 
 Example usage with file:
 
     $ echo "top secret" > file.txt
-    $ crypt en aws --in file.txt --out file.enc --region eu-west-1 --kms alias/test
-    $ crypt de aws --in file.enc --out file.dec --region eu-west-1
+    $ crypt encrypt aws --in file.txt --out file.enc --region eu-west-1 --kms alias/test
+    $ crypt decrypt aws --in file.enc --out file.dec --region eu-west-1
 
-Example usage with stdin:
+Example usage with `stdin`:
 
-    $ echo "top secret" | crypt en aws --out file.enc --region eu-west-1 --kms alias/test
-
-For more details run `crypt en aws --help` or `crypt de aws --help`
-
-    NAME:
-       crypt encrypt aws - Encrypts files and/or strings with AWS KMS
-
-    USAGE:
-       crypt encrypt aws [command options] [arguments...]
-
-    OPTIONS:
-       --in value, --input value                       the input file to decrypt, stdin if empty
-       --out value, --output value                     the output file, stdout if empty
-       --region value                                  the AWS region
-       --key-id value, --kms value, --kms-alias value  the Amazon Resource Name (ARN), alias name, or alias ARN for the customer master key
-
-#### Useful links
-
-- [AWS Key Management Service (KMS)](https://aws.amazon.com/kms/)
-- [AWS KMS Creating Keys](https://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html)
-- [AWS KMS CLI command reference](https://docs.aws.amazon.com/cli/latest/reference/kms/index.html#cli-aws-kms)
+    $ echo "top secret" | crypt encrypt aws --out file.enc --region eu-west-1 --kms alias/test
 
 ### Encryption using with GCP KMS
 
-`crypt` uses [DefaultClient](https://godoc.org/golang.org/x/oauth2/google#DefaultClient) from official [Google Cloud Client Libraries for Go](https://github.com/GoogleCloudPlatform/google-cloud-go).
+GCP KMS uses [DefaultClient](https://godoc.org/golang.org/x/oauth2/google#DefaultClient) from [Google Cloud Client Libraries for Go](https://github.com/GoogleCloudPlatform/google-cloud-go).
 You can either run `gcloud auth application-default login` or set `GOOGLE_APPLICATION_CREDENTIALS` environment variable which points to the file with valid service account.
-
-#### Examples
 
 Example usage with file:
 
     $ echo "top secret" > file.txt
-    $ crypt en gcp --in file.txt --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
-    $ crypt de gcp --in file.enc --out file.dec --project lunar-compiler-123456 --location global --keyring test --key quickstart
+    $ crypt encrypt gcp --in file.txt --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
+    $ crypt decrypt gcp --in file.enc --out file.dec --project lunar-compiler-123456 --location global --keyring test --key quickstart
 
-Example usage with stdin:
+Example usage with `stdin`:
 
-    $ echo "top secret" | crypt en gcp --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
-
-For more details run `crypt en gcp --help` or `crypt de gcp --help`
-
-    NAME:
-       crypt encrypt gcp - Encrypts files and/or strings with GCP KMS
-
-    USAGE:
-       crypt encrypt gcp [command options] [arguments...]
-
-    OPTIONS:
-       --in value, --input value    the input file to decrypt, stdin if empty
-       --out value, --output value  the output file, stdout if empty
-       --project value              the GCP project id for Cloud KMS
-       --location value             the location for project and Cloud KMS
-       --keyring value              the key ring name
-       --key value                  the cryptographic key name
-
-
-#### Useful links
-
-- [Installing Google Cloud SDK](https://cloud.google.com/sdk/install)
-- [gcloud auth application-default login](https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login)
-- [Setting Up Authentication for Server to Server Production Applications](https://cloud.google.com/docs/authentication/production)
-- [Cloud KMS - Quickstart](https://cloud.google.com/kms/docs/quickstart)
-- [Cloud KMS - Encrypting and Decrypting Data](https://cloud.google.com/kms/docs/encrypt-decrypt#kms-howto-encrypt-go)
+    $ echo "top secret" | crypt encrypt gcp --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
 
 ### Encryption using Azure Key Vault
 
-`crypt` uses [NewAuthorizerFromEnvironment](https://github.com/Azure/azure-sdk-for-go) from official [Microsoft Azure SDK for go](https://github.com/Azure/azure-sdk-for-go).
-
-#### Examples
+Azure Key Vault uses [NewAuthorizerFromEnvironment](https://github.com/Azure/azure-sdk-for-go) from [Microsoft Azure SDK for go](https://github.com/Azure/azure-sdk-for-go).
+Run `az login` to get your Azure credentials.
 
 Example usage with file:
 
     $ echo "top secret" > file.txt
-    $ crypt en gcp --in file.txt --out file.enc --vaultURL https://example-vault.vault.azure.net --name global --version 77ea..
-    $ crypt de gcp --in file.enc --out file.dec --vaultURL https://example-vault.vault.azure.net --name global --version 77ea..
+    $ crypt encrypt gcp --in file.txt --out file.enc --vaultURL https://example-vault.vault.azure.net --name global --version 77ea..
+    $ crypt decrypt gcp --in file.enc --out file.dec --vaultURL https://example-vault.vault.azure.net --name global --version 77ea..
 
-Example usage with stdin:
+Example usage with `stdin`:
 
-    $ echo "top secret" | crypt en gcp --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
-
-
-For more details run `crypt en azure --help` or `crypt de azure --help`
-
-    NAME:
-       crypt encrypt azure - Encrypts files and/or strings with Azure Key Vault
-
-    USAGE:
-       crypt encrypt azure [command options] [arguments...]
-
-    OPTIONS:
-       --in value, --input value    the input file to decrypt, stdin if empty
-       --out value, --output value  the output file, stdout if empty
-       --vaultURL value             Azure vault URL
-       --name value                 the key name
-       --version value              the key version
-
-#### Useful links
-
-- [Azure Key Vault Documentation](https://docs.microsoft.com/en-us/azure/key-vault/)
-- [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest)
-
-## Contribution
-
-Feel free to file [issues](https://github.com/VirtusLab/crypt/issues) or [pull requests](https://github.com/VirtusLab/crypt/pulls).
+    $ echo "top secret" | crypt encrypt gcp --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
 
 ## Development
 
@@ -194,10 +114,10 @@ Feel free to file [issues](https://github.com/VirtusLab/crypt/issues) or [pull r
 
 ### Integration testing
 
-Set up required environment variables in `config.env` and run:
+Update properties in `config.env` and run:
 
     make integrationtest
+    
+## Contribution
 
-## The name
-
-We believe in obvious names. It encrypts and decrypts.
+Feel free to file [issues](https://github.com/VirtusLab/crypt/issues) or [pull requests](https://github.com/VirtusLab/crypt/pulls).    
