@@ -67,7 +67,7 @@ Example usage with `stdin`:
 
     $ echo "top secret" | crypt encrypt aws --out file.enc --region eu-west-1 --kms alias/test
 
-### Encryption using with GCP KMS
+### Encryption using GCP KMS
 
 GCP KMS uses [DefaultClient](https://godoc.org/golang.org/x/oauth2/google#DefaultClient) from [Google Cloud Client Libraries for Go](https://github.com/GoogleCloudPlatform/google-cloud-go).
 You can either run `gcloud auth application-default login` or set `GOOGLE_APPLICATION_CREDENTIALS` environment variable which points to the file with valid service account.
