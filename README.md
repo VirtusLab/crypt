@@ -99,7 +99,7 @@ Example usage with `stdin`:
 
 ## Development
 
-    mkdir $GOPATH/src/github.com/VirtusLab/
+    mkdir -p $GOPATH/src/github.com/VirtusLab/
     git clone
 
     go get -u github.com/golang/dep/cmd/dep
