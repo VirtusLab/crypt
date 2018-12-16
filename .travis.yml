@@ -9,6 +9,9 @@ matrix:
 before_install:
 - go get golang.org/x/lint/golint
 - go get honnef.co/go/tools/cmd/staticcheck
+- go get -u github.com/golang/dep/cmd/dep
+- make
+- make dep
 
 script:
 - make verify
@@ -56,3 +59,8 @@ deploy:
   - cross/crypt-windows-386
   - cross/crypt-windows-386.md5
   - cross/crypt-windows-386.sha256
+
+# These directories are cached to S3 at the end of the build
+cache:
+  directories:
+    - vendor
