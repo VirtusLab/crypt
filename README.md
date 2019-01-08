@@ -68,12 +68,22 @@ You can either run `aws configure` (if you don't have `~/.aws/credentials` alrea
 Example usage with file:
 
     $ echo "top secret" > file.txt
-    $ crypt encrypt aws --in file.txt --out file.enc --region eu-west-1 --kms alias/test
-    $ crypt decrypt aws --in file.enc --out file.dec --region eu-west-1
+    $ crypt encrypt aws \
+        --in file.txt \
+        --out file.enc \
+        --region eu-west-1 \
+        --kms alias/test
+    $ crypt decrypt aws \
+        --in file.enc \
+        --out file.dec \
+        --region eu-west-1
 
 Example usage with `stdin`:
 
-    $ echo "top secret" | crypt encrypt aws --out file.enc --region eu-west-1 --kms alias/test
+    $ echo "top secret" | crypt encrypt aws \
+        --out file.enc \
+        --region eu-west-1 \
+        --kms alias/test
 
 ### Encryption using GCP KMS
 
@@ -83,12 +93,29 @@ You can either run `gcloud auth application-default login` or set `GOOGLE_APPLIC
 Example usage with file:
 
     $ echo "top secret" > file.txt
-    $ crypt encrypt gcp --in file.txt --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
-    $ crypt decrypt gcp --in file.enc --out file.dec --project lunar-compiler-123456 --location global --keyring test --key quickstart
+    $ crypt encrypt gcp \
+        --in file.txt \
+        --out file.enc \
+        --project lunar-compiler-123456 \
+        --location global \
+        --keyring test \
+        --key quickstart
+    $ crypt decrypt gcp \
+        --in file.enc \
+        --out file.dec \
+        --project lunar-compiler-123456 \
+        --location global \
+        --keyring test \
+        --key quickstart
 
 Example usage with `stdin`:
 
-    $ echo "top secret" | crypt encrypt gcp --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
+    $ echo "top secret" | crypt encrypt gcp \
+        --out file.enc \
+        --project lunar-compiler-123456 \
+        --location global \
+        --keyring test \
+        --key quickstart
 
 ### Encryption using Azure Key Vault
 
@@ -98,12 +125,27 @@ Run `az login` to get your Azure credentials.
 Example usage with file:
 
     $ echo "top secret" > file.txt
-    $ crypt encrypt gcp --in file.txt --out file.enc --vaultURL https://example-vault.vault.azure.net --name global --version 77ea..
-    $ crypt decrypt gcp --in file.enc --out file.dec --vaultURL https://example-vault.vault.azure.net --name global --version 77ea..
+    $ crypt encrypt gcp \
+        --in file.txt \
+        --out file.enc \
+        --vaultURL https://example-vault.vault.azure.net \
+        --name global \
+        --version 77ea..
+    $ crypt decrypt gcp \
+        --in file.enc \
+        --out file.dec \
+        --vaultURL https://example-vault.vault.azure.net \
+        --name global \
+        --version 77ea..
 
 Example usage with `stdin`:
 
-    $ echo "top secret" | crypt encrypt gcp --out file.enc --project lunar-compiler-123456 --location global --keyring test --key quickstart
+    $ echo "top secret" | crypt encrypt gcp \
+        --out file.enc \
+        --project lunar-compiler-123456 \
+        --location global \
+        --keyring test \
+        --key quickstart
 
 ## Development
 
