@@ -18,6 +18,14 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
 * [Contribution](README.md#contribution)
 
 
+## Maturity
+
+Provider        | Maturity
+----------------|---------
+AWS KMS         | `beta`
+GCP KMS         | `alpha`
+Azure Key Vault | `alpha`
+
 ## Installation
 
 #### Binaries
@@ -99,13 +107,15 @@ Example usage with `stdin`:
 
 ## Development
 
-    mkdir -p $GOPATH/src/github.com/VirtusLab/
-    git clone
+    export GOPATH=$HOME/go
+    export PATH=$PATH:$GOPATH/bin
+
+    mkdir -p $GOPATH/src/github.com/VirtusLab
+    cd $GOPATH/src/github.com/VirtusLab
+    git clone git@github.com:VirtusLab/crypt.git
+    cd crypt
 
     go get -u github.com/golang/dep/cmd/dep
-
-    export PATH=$PATH:$GOPATH/bin
-    cd $GOPATH/src/github.com/VirtusLab/crypt
     make all
 
 ### Testing
