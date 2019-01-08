@@ -1,127 +1,73 @@
 package crypto
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
 
-	"github.com/sirupsen/logrus"
-	"github.com/sirupsen/logrus/hooks/test"
+	"github.com/VirtusLab/crypt/test/kms/fake"
+
+	"github.com/VirtusLab/go-extended/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
-type FakeFunc func(input []byte) ([]byte, error)
+func when(crypt Crypt, inputPath string) (string, error) {
+	defer func() { _ = os.Remove(inputPath + ".encrypted") }() // clean up
+	defer func() { _ = os.Remove(inputPath + ".decrypted") }() // clean up
 
-type FakeKMS struct {
-	encrypt FakeFunc
-	decrypt FakeFunc
-}
-
-func NewFakeKMS(encrypt FakeFunc, decrypt FakeFunc) *FakeKMS {
-	return &FakeKMS{
-		encrypt: encrypt,
-		decrypt: decrypt,
-	}
-}
-
-func (f *FakeKMS) Encrypt(plaintext []byte) ([]byte, error) {
-	return f.encrypt(plaintext)
-}
-
-func (f *FakeKMS) Decrypt(ciphertext []byte) ([]byte, error) {
-	return f.decrypt(ciphertext)
-}
-
-func TestCrypt(t *testing.T) {
-	type TestCase struct {
-		name    string
-		f       func(TestCase)
-		logHook *test.Hook
+	err := crypt.EncryptFile(inputPath, inputPath+".encrypted")
+	if err != nil {
+		return "", err
 	}
 
-	when := func(crypt *Crypt, inputPath string) (string, error) {
-		defer os.Remove(inputPath + ".encrypted") // clean up
-		defer os.Remove(inputPath + ".decrypted") // clean up
-
-		err := crypt.EncryptFile(inputPath, inputPath+".encrypted")
-		if err != nil {
-			return "", err
-		}
-
-		err = crypt.DecryptFile(inputPath+".encrypted", inputPath+".decrypted")
-		if err != nil {
-			return "", err
-		}
-
-		result, err := ioutil.ReadFile(inputPath + ".decrypted")
-		if err != nil {
-			return "", err
-		}
-
-		return string(result), nil
+	err = crypt.DecryptFile(inputPath+".encrypted", inputPath+".decrypted")
+	if err != nil {
+		return "", err
 	}
 
-	cases := []TestCase{
-		{
-			name: "encrypt decrypt file",
-			f: func(tc TestCase) {
-				encrypt := func(plaintext []byte) ([]byte, error) {
-					// do nothing
-					return plaintext, nil
-				}
-				decrypt := func(ciphertext []byte) ([]byte, error) {
-					// do nothing
-					return ciphertext, nil
-				}
+	result, err := ioutil.ReadFile(inputPath + ".decrypted")
+	if err != nil {
+		return "", err
+	}
 
-				fake := NewFakeKMS(encrypt, decrypt)
-				crypt := New(fake)
+	return string(result), nil
+}
 
-				inputFile := "test.txt"
-				expected := "top secret token"
-				err := ioutil.WriteFile(inputFile, []byte(expected), 0644)
-				if err != nil {
-					t.Fatal("Can't write plaintext file", err)
-				}
-				defer os.Remove(inputFile)
+func TestCrypt_EncryptDecryptFile(t *testing.T) {
+	test.Run(t, test.Test{
+		Name: "encrypt decrypt file",
+		Fn: func(tt test.Test) {
+			kms := fake.Empty()
+			crypt := New(kms)
 
-				actual, err := when(crypt, inputFile)
+			inputFile := "test.txt"
+			expected := "top secret token"
+			err := ioutil.WriteFile(inputFile, []byte(expected), 0644)
+			if err != nil {
+				t.Fatal("Can't write plaintext file", err)
+			}
+			defer func() { _ = os.Remove(inputFile) }()
 
-				assert.NoError(t, err, tc.name)
-				assert.Equal(t, expected, string(actual))
-			},
+			actual, err := when(crypt, inputFile)
+
+			assert.NoError(t, err, tt.Name)
+			assert.Equal(t, expected, string(actual))
 		},
-		{
-			name: "encrypt decrypt non-existing file",
-			f: func(tc TestCase) {
-				encrypt := func(plaintext []byte) ([]byte, error) {
-					// do nothing
-					return plaintext, nil
-				}
-				decrypt := func(ciphertext []byte) ([]byte, error) {
-					// do nothing
-					return ciphertext, nil
-				}
+	})
+}
 
-				fakeKMS := NewFakeKMS(encrypt, decrypt)
-				crypt := New(fakeKMS)
+func TestCrypt_EncryptDecryptFileError(t *testing.T) {
+	test.Run(t, test.Test{
+		Name: "encrypt decrypt non-existing file",
+		Fn: func(tt test.Test) {
+			kms := fake.Empty()
+			crypt := New(kms)
 
-				inputFile := "test.txt"
+			inputFile := "test.txt"
 
-				_, err := when(crypt, inputFile)
+			_, err := when(crypt, inputFile)
 
-				assert.Error(t, err, tc.name)
-			},
+			assert.Error(t, err, tt.Name)
 		},
-	}
-
-	logrus.SetLevel(logrus.DebugLevel)
-	hook := test.NewGlobal()
-
-	for i, c := range cases {
-		c.logHook = hook
-		t.Run(fmt.Sprintf("[%d] %s", i, c.name), func(t *testing.T) { c.f(c) })
-		hook.Reset()
-	}
+	})
 }
