@@ -5,6 +5,13 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Crypt is an abstraction for encryption and decryption with files support
+type Crypt interface {
+	KMS
+	EncryptFile(inputPath, outputPath string) error
+	DecryptFile(inputPath, outputPath string) error
+}
+
 // KMS (Key Management Service) is a common abstraction for encryption and decryption.
 // A KMS must be able to decrypt the data it encrypts.
 type KMS interface {
@@ -14,20 +21,20 @@ type KMS interface {
 
 // Crypt type represents the crypt abstraction for simple encryption and decryption.
 // A provider (e.g. AWS KMS) determines the detail of the cryptographic operations.
-type Crypt struct {
+type crypt struct {
 	kms KMS
 }
 
 // New creates a new Crypt with the given provider
-func New(kms KMS) *Crypt {
-	return &Crypt{kms: kms}
+func New(kms KMS) Crypt {
+	return &crypt{kms: kms}
 }
 
 // EncryptFile encrypts bytes from a file or stdin using a KMS provider
 // and the ciphertext is saved into a file.
 // If inputPath is empty, stdin is used as input
 // If outputPath is empty, stdout is used as output
-func (c *Crypt) EncryptFile(inputPath, outputPath string) error {
+func (c *crypt) EncryptFile(inputPath, outputPath string) error {
 	input, err := files.ReadInput(inputPath)
 	if err != nil {
 		logrus.Debugf("Can't open plaintext file: %v", err)
@@ -49,7 +56,7 @@ func (c *Crypt) EncryptFile(inputPath, outputPath string) error {
 // DecryptFile reads from the inputPath file or stdin if empty.
 // Then decrypts content with corresponding Key Management Service.
 // Plaintext is saved into outputPath file or print on stdout if empty.
-func (c *Crypt) DecryptFile(inputPath, outputPath string) error {
+func (c *crypt) DecryptFile(inputPath, outputPath string) error {
 	input, err := files.ReadInput(inputPath)
 	if err != nil {
 		logrus.Debugf("Can't open encrypted file: %v", err)
@@ -69,11 +76,11 @@ func (c *Crypt) DecryptFile(inputPath, outputPath string) error {
 }
 
 // Decrypt decrypts given bytes using the current provider
-func (c *Crypt) Decrypt(input []byte) ([]byte, error) {
+func (c *crypt) Decrypt(input []byte) ([]byte, error) {
 	return c.kms.Decrypt(input)
 }
 
 // Encrypt encrypts given bytes using the current provider
-func (c *Crypt) Encrypt(input []byte) ([]byte, error) {
+func (c *crypt) Encrypt(input []byte) ([]byte, error) {
 	return c.kms.Encrypt(input)
 }
