@@ -7,7 +7,6 @@ import (
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
-	"github.com/VirtusLab/crypt/crypto"
 	"github.com/sirupsen/logrus"
 )
 
@@ -28,7 +27,7 @@ type KMS struct {
 }
 
 // New creates Azure Key Vault KMS
-func New(vaultURL, key, keyVersion string) crypto.KMS {
+func New(vaultURL, key, keyVersion string) *KMS {
 	return &KMS{
 		vaultURL:   vaultURL,
 		key:        key,

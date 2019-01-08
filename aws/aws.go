@@ -3,7 +3,6 @@ package aws
 import (
 	"errors"
 
-	"github.com/VirtusLab/crypt/crypto"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
@@ -24,7 +23,7 @@ type KMS struct {
 }
 
 // New creates a AWS KMS provider
-func New(key, region string) crypto.KMS {
+func New(key, region string) *KMS {
 	return &KMS{
 		key:    key,
 		region: region,

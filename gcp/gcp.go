@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/VirtusLab/crypt/crypto"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"golang.org/x/oauth2/google"
@@ -32,7 +31,7 @@ type KMS struct {
 }
 
 // New new GCP KMS
-func New(project, location, keyring, key string) crypto.KMS {
+func New(project, location, keyring, key string) *KMS {
 	return &KMS{
 		project:  project,
 		location: location,

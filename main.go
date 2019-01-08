@@ -60,7 +60,7 @@ func main() {
 	}
 
 	app.CommandNotFound = func(c *cli.Context, command string) {
-		fmt.Fprintf(cli.ErrWriter, "There is no %q command.\n", command)
+		_, _ = fmt.Fprintf(cli.ErrWriter, "There is no %q command.\n", command)
 		cli.OsExiter(1)
 	}
 	app.OnUsageError = func(c *cli.Context, err error, isSubcommand bool) error {
@@ -68,7 +68,7 @@ func main() {
 			return err
 		}
 
-		fmt.Fprintf(cli.ErrWriter, "WRONG: %v\n", err)
+		_, _ = fmt.Fprintf(cli.ErrWriter, "WRONG: %v\n", err)
 		return nil
 	}
 	cli.OsExiter = func(c int) {
@@ -79,7 +79,7 @@ func main() {
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		fmt.Fprintf(cli.ErrWriter, "ERROR: %v\n", err)
+		_, _ = fmt.Fprintf(cli.ErrWriter, "ERROR: %v\n", err)
 		cli.OsExiter(1)
 	}
 }
