@@ -50,6 +50,18 @@
   version = "v11.2.6"
 
 [[projects]]
+  digest = "1:bc810ab868d290fbeadde3802e3e9c1959bfecff85a2efff6e0bc00974be38cb"
+  name = "github.com/VirtusLab/go-extended"
+  packages = [
+    "pkg/cli",
+    "pkg/log",
+    "pkg/test",
+  ]
+  pruneopts = "UT"
+  revision = "9c4259185e438a50d4be94f04e8e6aca368f34b3"
+  version = "v0.0.2"
+
+[[projects]]
   digest = "1:d1896b7bd2f9304e69bd928e0b8df8e4b400aa1ade3169031de8ff22a9611302"
   name = "github.com/aws/aws-sdk-go"
   packages = [
@@ -398,6 +410,7 @@
   input-imports = [
     "github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault",
     "github.com/Azure/azure-sdk-for-go/services/keyvault/auth",
+    "github.com/VirtusLab/go-extended/pkg/test",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/kms",
