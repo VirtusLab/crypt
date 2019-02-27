@@ -23,14 +23,22 @@ BUILDDIR := ${PREFIX}/cross
 # Populate version variables
 # Add to compile time flags
 VERSION := $(shell cat VERSION.txt)
-GITCOMMIT := $(shell git rev-parse --short HEAD)
-GITUNTRACKEDCHANGES := $(shell git status --porcelain --untracked-files=no)
-GITIGNOREDBUTTRACKEDCHANGES := $(shell git ls-files -i --exclude-standard)
+GITCOMMIT := $(or $(shell git rev-parse --short HEAD 2>/dev/null), $(shell echo "fromsrc"))
+GITUNTRACKEDCHANGES := $(shell git status --porcelain --untracked-files=no 2>&1))
+GITIGNOREDBUTTRACKEDCHANGES := $(shell git ls-files -i --exclude-standard 2>&1)
 ifneq ($(GITUNTRACKEDCHANGES),)
     GITCOMMIT := $(GITCOMMIT)-dirty
 endif
 ifneq ($(GITIGNOREDBUTTRACKEDCHANGES),)
     GITCOMMIT := $(GITCOMMIT)-dirty
+endif
+
+# If we're building from tar.gz released files the .git directory will be missing
+# to avoid errors at make status we set the two to null
+# this is mainly used in brew formula
+ifdef BUILDING_FROM_TGZ
+GITUNTRACKEDCHANGES =
+GITIGNOREDBUTTRACKEDCHANGES =
 endif
 
 CTIMEVAR=-X $(PKG)/version.GITCOMMIT=$(GITCOMMIT) -X $(PKG)/version.VERSION=$(VERSION)
