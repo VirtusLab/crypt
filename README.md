@@ -10,6 +10,7 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
 * [Installation](README.md#installation)
   * [Binaries](README.md#binaries)
   * [Via Go](README.md#via-go)
+  * [Via homebrew (macOS)](README.md#via-homebrew)
 * [Usage](README.md#usage)
   * [Encryption using AWS KMS](README.md#encryption-using-aws-kms)
   * [Encryption using GCP KMS](README.md#encryption-using-gcp-kms)
@@ -35,6 +36,11 @@ For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt
 #### Via Go
 
     $ go get github.com/VirtusLab/crypt
+    
+#### Via homebrew
+
+    # Will be installed as cloudcrypt
+    $ brew tap virtuslab/cloud && brew install cloudcrypt
 
 ## Usage
 
