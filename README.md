@@ -1,6 +1,6 @@
 # crypt
 
-[![Version](https://img.shields.io/badge/version-v0.0.6-brightgreen.svg)](https://github.com/VirtusLab/crypt/releases/tag/v0.0.6)
+[![Version](https://img.shields.io/badge/version-v0.1.0-brightgreen.svg)](https://github.com/VirtusLab/crypt/releases/tag/v0.1.0)
 [![Travis CI](https://img.shields.io/travis/VirtusLab/crypt.svg)](https://travis-ci.org/VirtusLab/crypt)
 [![Github All Releases](https://img.shields.io/github/downloads/VirtusLab/crypt/total.svg)](https://github.com/VirtusLab/crypt/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/VirtusLab/crypt "Go Report Card")](https://goreportcard.com/report/github.com/VirtusLab/crypt)
@@ -51,7 +51,7 @@ For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt
        crypt [global options] command [command options] [arguments...]
 
     VERSION:
-       v0.0.6
+       v0.1.0
 
     AUTHOR:
        VirtusLab
