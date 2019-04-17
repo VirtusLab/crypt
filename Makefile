@@ -23,9 +23,9 @@ BUILDDIR := ${PREFIX}/cross
 # Populate version variables
 # Add to compile time flags
 VERSION := $(shell cat VERSION.txt)
-GITCOMMIT := $(or $(shell git rev-parse --short HEAD 2>/dev/null), $(shell echo "fromsrc"))
-GITUNTRACKEDCHANGES := $(shell git status --porcelain --untracked-files=no 2>&1))
-GITIGNOREDBUTTRACKEDCHANGES := $(shell git ls-files -i --exclude-standard 2>&1)
+GITCOMMIT := $(shell git rev-parse --short HEAD)
+GITUNTRACKEDCHANGES := $(shell git status --porcelain --untracked-files=no)
+GITIGNOREDBUTTRACKEDCHANGES := $(shell git ls-files -i --exclude-standard)
 ifneq ($(GITUNTRACKEDCHANGES),)
     GITCOMMIT := $(GITCOMMIT)-dirty
 endif
@@ -37,8 +37,9 @@ endif
 # to avoid errors at make status we set the two to null
 # this is mainly used in brew formula
 ifdef BUILDING_FROM_TGZ
-GITUNTRACKEDCHANGES =
-GITIGNOREDBUTTRACKEDCHANGES =
+GITCOMMIT=fromsrc
+GITUNTRACKEDCHANGES=
+GITIGNOREDBUTTRACKEDCHANGES=
 endif
 
 CTIMEVAR=-X $(PKG)/version.GITCOMMIT=$(GITCOMMIT) -X $(PKG)/version.VERSION=$(VERSION)
