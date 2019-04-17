@@ -10,6 +10,8 @@ import (
 )
 
 const (
+	// DefaultProfile is the default profile to be used when loading configuration
+	// from the config files if another profile name is not provided.
 	DefaultProfile = session.DefaultSharedConfigProfile
 )
 
