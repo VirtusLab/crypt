@@ -1,11 +1,21 @@
+# Setup variables for the Makefile
+NAME=crypt
+PKG=github.com/VirtusLab/crypt
+
+# Setup default variables for Google KMS integration tests
+GCP_PROJECT_ID=lunar-compiler-221314
+GCP_LOCATION=global
+GCP_KEY_RING=test
+GCP_KEY=quickstart
+GOOGLE_APPLICATION_CREDENTIALS=/home/bartek/Documents/gcloud/kms-admin-sa.json
+
+# Setup default variables for Amazon KMS integration tests
+AWS_REGION=eu-west-1
+AWS_KEY=alias/test
+
 # Set POSIX sh for maximum interoperability
 SHELL := /bin/sh
 PATH  := $(GOPATH)/bin:$(PATH)
-
-# Import config
-# You can change the default config with `make config="config_special.env" build`
-config ?= config.env
-include $(config)
 
 # Set an output prefix, which is the local directory if not specified
 PREFIX?=$(shell pwd)
@@ -56,14 +66,14 @@ ARGS ?= $(EXTRA_ARGS)
 .DEFAULT_GOAL := help
 
 .PHONY: all
-all: clean dep build verify install ## Test, build, install
+all: clean dep verify build install ## Test, build, install
 	@echo "+ $@"
 
 .PHONY: init
 init: ## Initializes this Makefile dependencies: dep, golint, staticcheck, checkmake
 	@echo "+ $@"
 	go get -u github.com/golang/dep/cmd/dep
-	go get -u github.com/golang/lint/golint
+	go get -u golang.org/x/lint/golint
 	go get -u honnef.co/go/tools/cmd/staticcheck
 	go get -u golang.org/x/tools/cmd/goimports
 	go get -u github.com/mrtazz/checkmake
@@ -96,7 +106,7 @@ fmt: ## Verifies all files have been `gofmt`ed
 .PHONY: lint
 lint: ## Verifies `golint` passes
 	@echo "+ $@"
-	@golint $(PACKAGES)
+	@golint -set_exit_status $(PACKAGES)
 
 .PHONY: goimports
 goimports: ## Verifies `goimports` passes
@@ -163,7 +173,7 @@ release: $(wildcard *.go) $(wildcard */*.go) VERSION.txt ## Builds the cross-com
 	$(foreach GOOSARCH,$(GOOSARCHES), $(call buildrelease,$(subst /,,$(dir $(GOOSARCH))),$(notdir $(GOOSARCH))))
 
 .PHONY: verify
-verify: fmt lint vet staticcheck test ## Runs a fmt, lint, test and vet
+verify: fmt lint vet staticcheck goimports test ## Runs a fmt, lint, vet, staticcheck, goimports and test
 
 .PHONY: cover
 cover: ## Runs go test with coverage
@@ -193,10 +203,10 @@ spring-clean: ## Cleanup git ignored files (interactive)
 BUMP := patch
 bump-version: ## Bump the version in the version file. Set BUMP to [ patch | major | minor ]
 	@echo "+ $@"
-	@go get -u github.com/jessfraz/junk/sembump # update sembump tool
+	go get -u github.com/jessfraz/junk/sembump # update sembump tool
 	$(eval NEW_VERSION=$(shell sembump --kind $(BUMP) $(VERSION)))
 	@echo "Bumping VERSION.txt from $(VERSION) to $(NEW_VERSION)"
-	echo $(NEW_VERSION) > VERSION.txt
+	@echo $(NEW_VERSION) > VERSION.txt
 	@echo "Updating version from $(VERSION) to $(NEW_VERSION) in README.md"
 	sed -i s/$(VERSION)/$(NEW_VERSION)/g README.md
 	git add VERSION.txt README.md
