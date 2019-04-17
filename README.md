@@ -37,7 +37,7 @@ For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt
 
     $ go get github.com/VirtusLab/crypt
     
-#### Via homebrew
+#### Via Homebrew
 
     # Will be installed as cloudcrypt
     $ brew tap virtuslab/cloud && brew install cloudcrypt
@@ -51,7 +51,7 @@ For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt
        crypt [global options] command [command options] [arguments...]
 
     VERSION:
-       v0.1.0
+       v0.1.0-5d53a581
 
     AUTHOR:
        VirtusLab
@@ -69,7 +69,9 @@ For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt
 ### Encryption using AWS KMS
 
 AWS KMS uses client from [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/).
-You can either run `aws configure` (if you don't have `~/.aws/credentials` already) or set [environment variables](https://docs.aws.amazon.com/sdk-for-go/api/aws/session).
+You can either run `aws configure` (if you don't have `~/.aws/credentials` already) 
+or set [environment variables](https://docs.aws.amazon.com/sdk-for-go/api/aws/session).
+To set AWS profile use `--profile` parameter.
 
 Example usage with file:
 
@@ -172,7 +174,7 @@ Example usage with `stdin`:
 
 ### Integration testing
 
-Update properties in `config.env` and run:
+Update properties in `Makfile` if necessary and run:
 
     make integrationtest
     
