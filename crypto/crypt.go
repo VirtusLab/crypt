@@ -7,26 +7,35 @@ import (
 
 // Crypt is an abstraction for encryption and decryption with files support
 type Crypt interface {
-	KMS
+	Crypter
 	EncryptFile(inputPath, outputPath string) error
 	DecryptFile(inputPath, outputPath string) error
 }
 
-// KMS (Key Management Service) is a common abstraction for encryption and decryption.
-// A KMS must be able to decrypt the data it encrypts.
-type KMS interface {
+// Crypter is an Encrypter and a Decrypter
+type Crypter interface {
+	Encrypter
+	Decrypter
+}
+
+// Encrypter must be able to encrypt plaintext into ciphertext, see also Decrypter
+type Encrypter interface {
 	Encrypt(plaintext []byte) ([]byte, error)
+}
+
+// Decrypter must be able to decrypt ciphertext into plaintext, see also Encrypter
+type Decrypter interface {
 	Decrypt(ciphertext []byte) ([]byte, error)
 }
 
 // Crypt type represents the crypt abstraction for simple encryption and decryption.
 // A provider (e.g. AWS KMS) determines the detail of the cryptographic operations.
 type crypt struct {
-	kms KMS
+	kms Crypter
 }
 
 // New creates a new Crypt with the given provider
-func New(kms KMS) Crypt {
+func New(kms Crypter) Crypt {
 	return &crypt{kms: kms}
 }
 
