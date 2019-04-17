@@ -7,8 +7,8 @@ import (
 )
 
 // EncryptAWS encrypts plaintext using AWS KMS
-func EncryptAWS(awsKms, awsRegion, plaintext string) ([]byte, error) {
-	amazon := aws.New(awsKms, awsRegion)
+func EncryptAWS(awsKms, awsRegion, awsProfile, plaintext string) ([]byte, error) {
+	amazon := aws.New(awsKms, awsRegion, awsProfile)
 	result, err := amazon.Encrypt([]byte(plaintext))
 	if err != nil {
 		return nil, err
@@ -17,8 +17,8 @@ func EncryptAWS(awsKms, awsRegion, plaintext string) ([]byte, error) {
 }
 
 // DecryptAWS decrypts ciphertext using AWS KMS
-func DecryptAWS(awsRegion, ciphertext string) (string, error) {
-	amazon := aws.New("" /* not needed for decryption */, awsRegion)
+func DecryptAWS(awsRegion, awsProfile, ciphertext string) (string, error) {
+	amazon := aws.New("" /* not needed for decryption */, awsRegion, awsProfile)
 	result, err := amazon.Decrypt([]byte(ciphertext))
 	if err != nil {
 		return "", err

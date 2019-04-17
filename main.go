@@ -38,6 +38,8 @@ var (
 	awsKms string
 	// The geographical data center location where requests to AWS KMS are handled
 	awsRegion string
+	// The AWS API credentials profile to use
+	awsProfile string
 )
 
 func main() {
@@ -171,6 +173,12 @@ func encrypt() cli.Command {
 						Destination: &awsRegion, // FIXME #2 make this flag required
 					},
 					cli.StringFlag{
+						Name:        "profile",
+						Value:       aws.DefaultProfile,
+						Usage:       "the AWS API credentials profile",
+						Destination: &awsProfile,
+					},
+					cli.StringFlag{
 						Name:        "key-id, kms, kms-alias",
 						Value:       "",
 						Usage:       "the Amazon Resource Name (ARN), alias name, or alias ARN for the customer master key",
@@ -237,7 +245,7 @@ func encryptAzure(_ *cli.Context) error {
 }
 
 func encryptAws(_ *cli.Context) error {
-	amazon := aws.New(awsKms, awsRegion)
+	amazon := aws.New(awsKms, awsRegion, awsProfile)
 	crypt := crypto.New(amazon)
 	err := crypt.EncryptFile(inputPath, outputPath)
 	if err != nil {
@@ -321,6 +329,12 @@ func decrypt() cli.Command {
 						Usage:       "(required) the AWS region",
 						Destination: &awsRegion,
 					},
+					cli.StringFlag{
+						Name:        "profile",
+						Value:       aws.DefaultProfile,
+						Usage:       "the AWS API credentials profile",
+						Destination: &awsProfile,
+					},
 				},
 				Action: func(c *cli.Context) error {
 					if len(awsRegion) == 0 {
@@ -387,7 +401,7 @@ func decryptAzure(_ *cli.Context) error {
 }
 
 func decryptAws(_ *cli.Context) error {
-	amazon := aws.New(awsKms, awsRegion)
+	amazon := aws.New(awsKms, awsRegion, awsProfile)
 	crypt := crypto.New(amazon)
 	err := crypt.DecryptFile(inputPath, outputPath)
 	if err != nil {

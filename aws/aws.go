@@ -9,6 +9,10 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+const (
+	DefaultProfile = session.DefaultSharedConfigProfile
+)
+
 var (
 	// ErrKmsMissing - this is the custom error, returned when name, alias or arn is missing
 	ErrKmsMissing = errors.New("kms is empty or missing")
@@ -18,15 +22,17 @@ var (
 
 // KMS struct represents AWS Key Management Service
 type KMS struct {
-	region string
-	key    string
+	region  string
+	key     string
+	profile string
 }
 
 // New creates a AWS KMS provider
-func New(key, region string) *KMS {
+func New(key, region, profile string) *KMS {
 	return &KMS{
-		key:    key,
-		region: region,
+		key:     key,
+		region:  region,
+		profile: profile,
 	}
 }
 
@@ -43,12 +49,14 @@ func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 		return nil, ErrRegionMissing
 	}
 
-	// use AWS_DEFAULT_PROFILE environment variable to set profile
-	//
-	// If not set and environment variables are not set the "default"
-	// will be used as the profile to load the session config from.
+	if len(k.profile) == 0 {
+		logrus.Debug("Using default AWS API credentials profile")
+		k.profile = DefaultProfile
+	}
+
+	// AWS_DEFAULT_PROFILE environment variable can be also used to set profile
 	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
-		Profile: session.DefaultSharedConfigProfile,
+		Profile: k.profile,
 		Config:  aws.Config{Region: aws.String(k.region)},
 	}))
 	svc := kms.New(awsSession, aws.NewConfig().WithRegion(k.region))
@@ -71,12 +79,14 @@ func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
 		return nil, ErrRegionMissing
 	}
 
-	// use AWS_DEFAULT_PROFILE environment variable to set profile
-	//
-	// If not set and environment variables are not set the "default"
-	// will be used as the profile to load the session config from.
+	if len(k.profile) == 0 {
+		logrus.Debug("Using default AWS API credentials profile")
+		k.profile = DefaultProfile
+	}
+
+	// AWS_DEFAULT_PROFILE environment variable can be also used to set profile
 	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
-		Profile: session.DefaultSharedConfigProfile,
+		Profile: k.profile,
 		Config:  aws.Config{Region: aws.String(k.region)},
 	}))
 	svc := kms.New(awsSession)
