@@ -1,6 +1,7 @@
 package files
 
 import (
+	"bytes"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -40,6 +41,9 @@ func ReadInput(inputPath string) ([]byte, error) {
 		logrus.Debugf("Cannot read file: '%s'; %v", inputPath, err)
 		return nil, err
 	}
+	// golang adds a new line at the end of every line, not what we want here
+	// note that we need to make sure the workaround is cross platform
+	fileContent = bytes.TrimRight(fileContent, "\r\n")
 	return fileContent, nil
 }
 
