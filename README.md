@@ -127,19 +127,23 @@ Example usage with `stdin`:
 
 ### Encryption using Azure Key Vault
 
-Azure Key Vault uses [NewAuthorizerFromEnvironment](https://github.com/Azure/azure-sdk-for-go) from [Microsoft Azure SDK for go](https://github.com/Azure/azure-sdk-for-go).
-Run `az login` to get your Azure credentials.
+Currently, crypt uses [environment-based authentication](https://docs.microsoft.com/pl-pl/go/azure/azure-sdk-go-authorization#use-environment-based-authentication)
+which requires the following environment variables:
+
+- `AZURE_TENANT_ID` - The ID for the Active Directory tenant that the service principal belongs to.
+- `AZURE_CLIENT_ID` - The name or ID of the service principal.
+- `AZURE_CLIENT_SECRET` - The secret associated with the service principal.
 
 Example usage with file:
 
     $ echo "top secret" > file.txt
-    $ crypt encrypt gcp \
+    $ crypt encrypt azure \
         --in file.txt \
         --out file.enc \
         --vaultURL https://example-vault.vault.azure.net \
         --name global \
         --version 77ea..
-    $ crypt decrypt gcp \
+    $ crypt decrypt azure \
         --in file.enc \
         --out file.dec \
         --vaultURL https://example-vault.vault.azure.net \
@@ -148,12 +152,12 @@ Example usage with file:
 
 Example usage with `stdin`:
 
-    $ echo "top secret" | crypt encrypt gcp \
-        --out file.enc \
-        --project lunar-compiler-123456 \
-        --location global \
-        --keyring test \
-        --key quickstart
+    $ echo "top secret" | crypt encrypt azure \
+        --in file.enc \
+        --out file.dec \
+        --vaultURL https://example-vault.vault.azure.net \
+        --name global \
+        --version 77ea..
 
 ## Development
 
