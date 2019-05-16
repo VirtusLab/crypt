@@ -12,9 +12,7 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
   * [Via Go](README.md#via-go)
   * [Via homebrew (macOS)](README.md#via-homebrew)
 * [Usage](README.md#usage)
-  * [Encryption using AWS KMS](README.md#encryption-using-aws-kms)
-  * [Encryption using GCP KMS](README.md#encryption-using-gcp-kms)
-  * [Encryption using Azure Key Vault](README.md#encryption-using-azure-key-vault)
+  * [Examples](README.md#examples)
 * [Development](README.md#development)
 * [Contribution](README.md#contribution)
 
@@ -66,13 +64,13 @@ For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt
        --help, -h     show help
        --version, -v  print the version
 
-### Supported encryption backends
+### Examples
 
-Currently, `crypt` supports the following encryption backends:
+Please find usage examples below:
 
-- [getting started with AWS](docs/getting-started-aws.md)
-- [getting started with Azure](docs/getting-started-azure.md)
-- [getting started with GCP](docs/getting-started-gcp.md)
+- [Getting Started with AWS](docs/getting-started-aws.md)
+- [Getting Started with Azure](docs/getting-started-azure.md)
+- [Getting Started with GCP](docs/getting-started-gcp.md)
 
 ## Development
 
