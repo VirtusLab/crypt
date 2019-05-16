@@ -66,98 +66,13 @@ For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt
        --help, -h     show help
        --version, -v  print the version
 
-### Encryption using AWS KMS
+### Supported encryption backends
 
-AWS KMS uses client from [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/).
-You can either run `aws configure` (if you don't have `~/.aws/credentials` already) 
-or set [environment variables](https://docs.aws.amazon.com/sdk-for-go/api/aws/session).
-To set AWS profile use `--profile` parameter.
+Currently, `crypt` supports the following encryption backends:
 
-Example usage with file:
-
-    $ echo "top secret" > file.txt
-    $ crypt encrypt aws \
-        --in file.txt \
-        --out file.enc \
-        --region eu-west-1 \
-        --kms alias/test
-    $ crypt decrypt aws \
-        --in file.enc \
-        --out file.dec \
-        --region eu-west-1
-
-Example usage with `stdin`:
-
-    $ echo "top secret" | crypt encrypt aws \
-        --out file.enc \
-        --region eu-west-1 \
-        --kms alias/test
-
-### Encryption using GCP KMS
-
-GCP KMS uses [DefaultClient](https://godoc.org/golang.org/x/oauth2/google#DefaultClient) from [Google Cloud Client Libraries for Go](https://github.com/GoogleCloudPlatform/google-cloud-go).
-You can either run `gcloud auth application-default login` or set `GOOGLE_APPLICATION_CREDENTIALS` environment variable which points to the file with valid service account.
-
-Example usage with file:
-
-    $ echo "top secret" > file.txt
-    $ crypt encrypt gcp \
-        --in file.txt \
-        --out file.enc \
-        --project lunar-compiler-123456 \
-        --location global \
-        --keyring test \
-        --key quickstart
-    $ crypt decrypt gcp \
-        --in file.enc \
-        --out file.dec \
-        --project lunar-compiler-123456 \
-        --location global \
-        --keyring test \
-        --key quickstart
-
-Example usage with `stdin`:
-
-    $ echo "top secret" | crypt encrypt gcp \
-        --out file.enc \
-        --project lunar-compiler-123456 \
-        --location global \
-        --keyring test \
-        --key quickstart
-
-### Encryption using Azure Key Vault
-
-Currently, crypt uses [environment-based authentication](https://docs.microsoft.com/pl-pl/go/azure/azure-sdk-go-authorization#use-environment-based-authentication)
-which requires the following environment variables:
-
-- `AZURE_TENANT_ID` - The ID for the Active Directory tenant that the service principal belongs to.
-- `AZURE_CLIENT_ID` - The name or ID of the service principal.
-- `AZURE_CLIENT_SECRET` - The secret associated with the service principal.
-
-Example usage with file:
-
-    $ echo "top secret" > file.txt
-    $ crypt encrypt azure \
-        --in file.txt \
-        --out file.enc \
-        --vaultURL https://example-vault.vault.azure.net \
-        --name global \
-        --version 77ea..
-    $ crypt decrypt azure \
-        --in file.enc \
-        --out file.dec \
-        --vaultURL https://example-vault.vault.azure.net \
-        --name global \
-        --version 77ea..
-
-Example usage with `stdin`:
-
-    $ echo "top secret" | crypt encrypt azure \
-        --in file.enc \
-        --out file.dec \
-        --vaultURL https://example-vault.vault.azure.net \
-        --name global \
-        --version 77ea..
+- [getting started with AWS](docs/getting-started-aws.md)
+- [getting started with Azure](docs/getting-started-azure.md)
+- [getting started with GCP](docs/getting-started-gcp.md)
 
 ## Development
 
