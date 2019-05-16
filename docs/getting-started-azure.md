@@ -63,7 +63,7 @@ crypt encrypt azure \
 You should have output similar to this:
 
 ```console
-INFO Encryption succeeded                          key=example-key keyVersion=b3d715d803bb4e3fb07d12701a101dcd
+INFO Encryption succeeded   key=example-key keyVersion=b3d715d803bb4e3fb07d12701a101dcd
 ```
 
 ## Decryption
@@ -82,6 +82,6 @@ crypt decrypt azure \
 You should have output similar to this:
 
 ```console
-INFO Decryption succeeded                          key=example-key keyVersion=b3d715d803bb4e3fb07d12701a101dcd
+INFO Decryption succeeded   key=example-key keyVersion=b3d715d803bb4e3fb07d12701a101dcd
 ```
  
