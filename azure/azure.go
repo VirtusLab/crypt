@@ -19,16 +19,16 @@ var (
 	ErrKeyVersionMissing = errors.New("key version is empty or missing")
 )
 
-// KMS struct represents Azure Key Vault
-type KMS struct {
+// KeyVault struct represents Azure Key Vault
+type KeyVault struct {
 	vaultURL   string
 	key        string
 	keyVersion string
 }
 
-// New creates Azure Key Vault KMS
-func New(vaultURL, key, keyVersion string) *KMS {
-	return &KMS{
+// New creates Azure Key Vault KeyVault
+func New(vaultURL, key, keyVersion string) *KeyVault {
+	return &KeyVault{
 		vaultURL:   vaultURL,
 		key:        key,
 		keyVersion: keyVersion,
@@ -38,7 +38,7 @@ func New(vaultURL, key, keyVersion string) *KMS {
 func newKeyVaultClient() (keyvault.BaseClient, error) {
 	var err error
 	vaultClient := keyvault.New()
-	vaultClient.Authorizer, err = auth.NewAuthorizerFromEnvironment()
+	vaultClient.Authorizer, err = auth.NewAuthorizerFromCLI()
 	if err != nil {
 		logrus.WithError(err).Error("Failed to create Azure Authorizer")
 		return vaultClient, err
@@ -48,7 +48,7 @@ func newKeyVaultClient() (keyvault.BaseClient, error) {
 
 // Encrypt is encrypts plaintext using Azure Key Vault and returns ciphertext
 // See Crypt.Encrypt
-func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
+func (k *KeyVault) Encrypt(plaintext []byte) ([]byte, error) {
 	err := k.validate()
 	if err != nil {
 		return nil, err
@@ -80,7 +80,7 @@ func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 
 // Decrypt is responsible for decrypting ciphertext by Azure Key Vault encryption key and returning plaintext in bytes.
 // See Crypt.EncryptFile
-func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
+func (k *KeyVault) Decrypt(ciphertext []byte) ([]byte, error) {
 	// FIXME k.validateParams()
 	client, err := newKeyVaultClient()
 	if err != nil {
@@ -108,7 +108,7 @@ func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
 	return plaintext, nil
 }
 
-func (k *KMS) validate() error {
+func (k *KeyVault) validate() error {
 	if len(k.vaultURL) == 0 {
 		logrus.Debugf("Error reading vaultURL: %v", k.vaultURL)
 		return ErrVaultURLMissing
