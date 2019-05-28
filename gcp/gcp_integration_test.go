@@ -3,80 +3,41 @@
 package gcp
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"testing"
 
 	"github.com/VirtusLab/crypt/crypto"
+	"github.com/VirtusLab/crypt/test"
+
 	"github.com/sirupsen/logrus"
-	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestEncryptDecryptWithGCP(t *testing.T) {
-	type TestCase struct {
-		name    string
-		f       func(TestCase)
-		logHook *test.Hook
-	}
+	logrus.SetLevel(logrus.DebugLevel)
 
 	// configuration from config.env
 	projectId := os.Getenv("GCP_PROJECT_ID")
 	location := os.Getenv("GCP_LOCATION")
 	keyring := os.Getenv("GCP_KEY_RING")
 	key := os.Getenv("GCP_KEY")
+	require.NotEmpty(t, projectId)
+	require.NotEmpty(t, location)
+	require.NotEmpty(t, keyring)
+	require.NotEmpty(t, key)
 
-	when := func(crypt *crypto.Crypt, inputPath string) (string, error) {
-		defer os.Remove(inputPath + ".encrypted") // clean up
-		defer os.Remove(inputPath + ".decrypted") // clean up
+	crypt := crypto.New(New(projectId, location, keyring, key))
 
-		err := crypt.EncryptFile(inputPath, inputPath+".encrypted")
-		if err != nil {
-			return "", err
-		}
+	inputFile := "test.txt"
+	expected := "top secret token"
+	err := ioutil.WriteFile(inputFile, []byte(expected), 0644)
+	defer os.Remove(inputFile)
+	require.NoError(t, err, "Can't write plaintext file")
 
-		err = crypt.DecryptFile(inputPath+".encrypted", inputPath+".decrypted")
-		if err != nil {
-			return "", err
-		}
+	actual, err := test.EncryptAndDecryptFile(crypt, inputFile)
 
-		result, err := ioutil.ReadFile(inputPath + ".decrypted")
-		if err != nil {
-			return "", err
-		}
-
-		return string(result), nil
-	}
-
-	cases := []TestCase{
-		{
-			name: "encrypt decrypt file",
-			f: func(tc TestCase) {
-				google := New(projectId, location, keyring, key)
-				crypt := crypto.New(google)
-
-				inputFile := "test.txt"
-				expected := "top secret token"
-				err := ioutil.WriteFile(inputFile, []byte(expected), 0644)
-				if err != nil {
-					t.Fatal("Can't write plaintext file", err)
-				}
-				defer os.Remove(inputFile)
-
-				actual, err := when(crypt, inputFile)
-
-				assert.Equal(t, expected, string(actual))
-			},
-		},
-	}
-
-	logrus.SetLevel(logrus.DebugLevel)
-	hook := test.NewGlobal()
-
-	for i, c := range cases {
-		c.logHook = hook
-		t.Run(fmt.Sprintf("[%d] %s", i, c.name), func(t *testing.T) { c.f(c) })
-		hook.Reset()
-	}
+	assert.NoError(t, err)
+	assert.Equal(t, expected, string(actual))
 }

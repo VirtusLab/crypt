@@ -2,16 +2,10 @@
 NAME=crypt
 PKG=github.com/VirtusLab/crypt
 
-# Setup default variables for Google KMS integration tests
-GCP_PROJECT_ID=lunar-compiler-221314
-GCP_LOCATION=global
-GCP_KEY_RING=test
-GCP_KEY=quickstart
-GOOGLE_APPLICATION_CREDENTIALS=/home/bartek/Documents/gcloud/kms-admin-sa.json
-
-# Setup default variables for Amazon KMS integration tests
-AWS_REGION=eu-west-1
-AWS_KEY=alias/test
+# Import config
+# You can change the default config with `make config="config_special.env" build`
+config ?= config.env
+include $(config)
 
 # Set POSIX sh for maximum interoperability
 SHELL := /bin/sh
@@ -119,6 +113,14 @@ test: ## Runs the go tests
 	@RUNNING_TESTS=1 go test -v -tags "$(BUILDTAGS) cgo" $(PACKAGES)
 
 .PHONY: integrationtest
+integrationtest: export AWS_REGION = $(AWS_REGION_IT)
+integrationtest: export AWS_KEY = $(AWS_KEY_IT)
+integrationtest: export AWS_PROFILE = $(AWS_PROFILE_IT)
+integrationtest: export GCP_PROJECT_ID = $(GCP_PROJECT_ID_IT)
+integrationtest: export GCP_LOCATION = $(GCP_LOCATION_IT)
+integrationtest: export GCP_KEY_RING = $(GCP_KEY_RING_IT)
+integrationtest: export GCP_KEY_IT = $(GCP_KEY_IT_IT)
+integrationtest: export GOOGLE_APPLICATION_CREDENTIALS = $(GOOGLE_APPLICATION_CREDENTIALS_IT)
 integrationtest: export VAULT_URL = $(VAULT_URL_IT)
 integrationtest: export VAULT_KEY = $(VAULT_KEY_IT)
 integrationtest: export VAULT_KEY_VERSION = $(VAULT_KEY_VERSION_IT)
