@@ -2,6 +2,7 @@ package crypto
 
 import (
 	"github.com/VirtusLab/crypt/files"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -31,15 +32,15 @@ type Decrypter interface {
 // Crypt type represents the crypt abstraction for simple encryption and decryption.
 // A provider (e.g. AWS KMS) determines the detail of the cryptographic operations.
 type crypt struct {
-	kms Crypter
+	crypter Crypter
 }
 
 // New creates a new Crypt with the given provider
-func New(kms Crypter) Crypt {
-	return &crypt{kms: kms}
+func New(crypter Crypter) Crypt {
+	return &crypt{crypter: crypter}
 }
 
-// EncryptFile encrypts bytes from a file or stdin using a KMS provider
+// EncryptFile encrypts bytes from a file or stdin using a Crypter provider
 // and the ciphertext is saved into a file.
 // If inputPath is empty, stdin is used as input
 // If outputPath is empty, stdout is used as output
@@ -86,10 +87,10 @@ func (c *crypt) DecryptFile(inputPath, outputPath string) error {
 
 // Decrypt decrypts given bytes using the current provider
 func (c *crypt) Decrypt(input []byte) ([]byte, error) {
-	return c.kms.Decrypt(input)
+	return c.crypter.Decrypt(input)
 }
 
 // Encrypt encrypts given bytes using the current provider
 func (c *crypt) Encrypt(input []byte) ([]byte, error) {
-	return c.kms.Encrypt(input)
+	return c.crypter.Encrypt(input)
 }
