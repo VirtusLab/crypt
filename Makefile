@@ -119,6 +119,9 @@ test: ## Runs the go tests
 	@RUNNING_TESTS=1 go test -v -tags "$(BUILDTAGS) cgo" $(PACKAGES)
 
 .PHONY: integrationtest
+integrationtest: export VAULT_URL = $(VAULT_URL_IT)
+integrationtest: export VAULT_KEY = $(VAULT_KEY_IT)
+integrationtest: export VAULT_KEY_VERSION = $(VAULT_KEY_VERSION_IT)
 integrationtest: ## Runs the go tests
 	@echo "+ $@"
 	@go test -v -tags "$(BUILDTAGS) cgo integration" $(PACKAGES)
