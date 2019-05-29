@@ -7,7 +7,6 @@ import (
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/api/cloudkms/v1"
 )
 
@@ -52,12 +51,7 @@ func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 	// Use GOOGLE_APPLICATION_CREDENTIALS environment variable to specify
 	// a service account key file to authenticate to the API.
 	ctx := context.Background()
-	client, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
-	if err != nil {
-		return nil, err
-	}
-
-	kmsService, err := cloudkms.New(client)
+	kmsService, err := cloudkms.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -88,12 +82,8 @@ func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
 	// Use GOOGLE_APPLICATION_CREDENTIALS environment variable to specify
 	// a service account key file to authenticate to the API.
 	ctx := context.Background()
-	client, err := google.DefaultClient(ctx, cloudkms.CloudPlatformScope)
-	if err != nil {
-		return nil, err
-	}
 
-	cloudkmsService, err := cloudkms.New(client)
+	cloudkmsService, err := cloudkms.NewService(ctx)
 	if err != nil {
 		return nil, err
 	}
