@@ -235,9 +235,12 @@ func encrypt() cli.Command {
 }
 
 func encryptAzure(_ *cli.Context) error {
-	azr := azure.New(azureVaultURL, azureKey, azureKeyVersion)
+	azr, err := azure.New(azureVaultURL, azureKey, azureKeyVersion)
+	if err != nil {
+		return err
+	}
 	crypt := crypto.New(azr)
-	err := crypt.EncryptFile(inputPath, outputPath)
+	err = crypt.EncryptFile(inputPath, outputPath)
 	if err != nil {
 		return err
 	}
@@ -391,9 +394,12 @@ func decrypt() cli.Command {
 }
 
 func decryptAzure(_ *cli.Context) error {
-	azr := azure.New(azureVaultURL, azureKey, azureKeyVersion)
+	azr, err := azure.New(azureVaultURL, azureKey, azureKeyVersion)
+	if err != nil {
+		return err
+	}
 	crypt := crypto.New(azr)
-	err := crypt.DecryptFile(inputPath, outputPath)
+	err = crypt.DecryptFile(inputPath, outputPath)
 	if err != nil {
 		return err
 	}

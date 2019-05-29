@@ -1,4 +1,4 @@
-// Package fake is a fake KMS provider for testing purposes
+// Package fake is a fake provider for testing purposes
 package fake
 
 // Operation represents a Fake operation
@@ -10,7 +10,7 @@ type Fake struct {
 	decrypt Operation
 }
 
-// Empty creates an empty (as in does nothing) fake KMS provider
+// Empty creates an empty (as in does nothing) fake provider
 func Empty() *Fake {
 	encrypt := func(plaintext []byte) ([]byte, error) {
 		// do nothing
@@ -23,7 +23,7 @@ func Empty() *Fake {
 	return New(encrypt, decrypt)
 }
 
-// New creates a custom fake KMS provider
+// New creates a custom fake provider
 func New(encrypt Operation, decrypt Operation) *Fake {
 	return &Fake{
 		encrypt: encrypt,

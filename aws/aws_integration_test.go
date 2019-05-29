@@ -34,7 +34,7 @@ func TestEncryptDecryptWithAWS(t *testing.T) {
 	defer os.Remove(inputFile)
 	require.NoError(t, err, "Can't write plaintext file")
 
-	actual, err := test.EncryptAndDecryptFile(crypt, inputFile)
+	actual, err := test.EncryptAndDecryptFile(crypt, crypt, inputFile)
 
 	assert.NoError(t, err)
 	assert.Equal(t, expected, string(actual))

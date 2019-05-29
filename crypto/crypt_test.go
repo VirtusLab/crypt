@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/VirtusLab/crypt/test/kms/fake"
+	"github.com/VirtusLab/crypt/test/fake"
 
 	"github.com/VirtusLab/go-extended/pkg/test"
 	"github.com/stretchr/testify/assert"

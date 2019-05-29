@@ -72,7 +72,10 @@ func DecryptGCP(gcpProject, gcpLocation, gcpKeyring, gcpKey, ciphertext string) 
 
 // EncryptAzure encrypts plaintext using Azure Key Vault
 func EncryptAzure(azureVaultURL, azureKey, azureKeyVersion, plaintext string) ([]byte, error) {
-	azr := azure.New(azureVaultURL, azureKey, azureKeyVersion)
+	azr, err := azure.New(azureVaultURL, azureKey, azureKeyVersion)
+	if err != nil {
+		return nil, err
+	}
 	result, err := azr.Encrypt([]byte(plaintext))
 	if err != nil {
 		return nil, err
@@ -82,7 +85,10 @@ func EncryptAzure(azureVaultURL, azureKey, azureKeyVersion, plaintext string) ([
 
 // DecryptAzure decrypts ciphertext using Azure Key Vault
 func DecryptAzure(azureVaultURL, azureKey, azureKeyVersion, ciphertext string) (string, error) {
-	azr := azure.New(azureVaultURL, azureKey, azureKeyVersion)
+	azr, err := azure.New(azureVaultURL, azureKey, azureKeyVersion)
+	if err != nil {
+		return "", err
+	}
 	result, err := azr.Decrypt([]byte(ciphertext))
 	if err != nil {
 		return "", err

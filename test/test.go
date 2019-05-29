@@ -8,16 +8,16 @@ import (
 )
 
 // EncryptAndDecryptFile encrypts and decrypts file using provider Crypt implementation
-func EncryptAndDecryptFile(crypt crypto.Crypt, inputPath string) (string, error) {
-	defer os.Remove(inputPath + ".encrypted") // clean up
-	defer os.Remove(inputPath + ".decrypted") // clean up
+func EncryptAndDecryptFile(encrypt, decrypt crypto.Crypt, inputPath string) (string, error) {
+	defer func() { _ = os.Remove(inputPath + ".encrypted") }() // clean up
+	defer func() { _ = os.Remove(inputPath + ".decrypted") }() // clean up
 
-	err := crypt.EncryptFile(inputPath, inputPath+".encrypted")
+	err := encrypt.EncryptFile(inputPath, inputPath+".encrypted")
 	if err != nil {
 		return "", err
 	}
 
-	err = crypt.DecryptFile(inputPath+".encrypted", inputPath+".decrypted")
+	err = decrypt.DecryptFile(inputPath+".encrypted", inputPath+".decrypted")
 	if err != nil {
 		return "", err
 	}
