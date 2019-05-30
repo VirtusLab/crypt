@@ -7,8 +7,8 @@ import (
 
 	"github.com/VirtusLab/crypt/test/fake"
 
-	"github.com/VirtusLab/go-extended/pkg/test"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func when(crypt Crypt, inputPath string) (string, error) {
@@ -34,40 +34,28 @@ func when(crypt Crypt, inputPath string) (string, error) {
 }
 
 func TestCrypt_EncryptDecryptFile(t *testing.T) {
-	test.Run(t, test.Test{
-		Name: "encrypt decrypt file",
-		Fn: func(tt test.Test) {
-			kms := fake.Empty()
-			crypt := New(kms)
+	kms := fake.Empty()
+	crypt := New(kms)
 
-			inputFile := "test.txt"
-			expected := "top secret token"
-			err := ioutil.WriteFile(inputFile, []byte(expected), 0644)
-			if err != nil {
-				t.Fatal("Can't write plaintext file", err)
-			}
-			defer func() { _ = os.Remove(inputFile) }()
+	inputFile := "test.txt"
+	expected := "top secret token"
+	err := ioutil.WriteFile(inputFile, []byte(expected), 0644)
+	require.NoError(t, err, "Can't write plaintext file")
+	defer func() { _ = os.Remove(inputFile) }()
 
-			actual, err := when(crypt, inputFile)
+	actual, err := when(crypt, inputFile)
 
-			assert.NoError(t, err, tt.Name)
-			assert.Equal(t, expected, string(actual))
-		},
-	})
+	assert.NoError(t, err)
+	assert.Equal(t, expected, string(actual))
 }
 
 func TestCrypt_EncryptDecryptFileError(t *testing.T) {
-	test.Run(t, test.Test{
-		Name: "encrypt decrypt non-existing file",
-		Fn: func(tt test.Test) {
-			kms := fake.Empty()
-			crypt := New(kms)
+	kms := fake.Empty()
+	crypt := New(kms)
 
-			inputFile := "test.txt"
+	inputFile := "test.txt"
 
-			_, err := when(crypt, inputFile)
+	_, err := when(crypt, inputFile)
 
-			assert.Error(t, err, tt.Name)
-		},
-	})
+	assert.EqualError(t, err, "open test.txt: no such file or directory")
 }
