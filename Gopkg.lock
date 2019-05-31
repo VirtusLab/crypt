@@ -50,16 +50,12 @@
   version = "v12.1.0"
 
 [[projects]]
-  digest = "1:d9e58bccb730d8a8c9ea7c2544432b8540ebecc2018eb4ef698562a8ceec4021"
+  digest = "1:0b9721924611fc12d167bf850599e6199ce18611d0aadde515e4a12ca45b21f0"
   name = "github.com/VirtusLab/go-extended"
-  packages = [
-    "pkg/cli",
-    "pkg/log",
-    "pkg/test",
-  ]
+  packages = ["pkg/files"]
   pruneopts = "UT"
-  revision = "c65a7fc645018f67cbe6864d67b315c50b47d3b0"
-  version = "v0.0.4"
+  revision = "59e3991ac58f3aca978e58cda5dd91cc5186d33d"
+  version = "v0.0.5"
 
 [[projects]]
   digest = "1:14bd1cb06669a67e8f06b1ade750c981b44df6b6a4117bc1936c29fc03b54dd5"
@@ -457,7 +453,7 @@
     "github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault/keyvaultapi",
     "github.com/Azure/azure-sdk-for-go/services/keyvault/auth",
     "github.com/Azure/go-autorest/autorest",
-    "github.com/VirtusLab/go-extended/pkg/test",
+    "github.com/VirtusLab/go-extended/pkg/files",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/kms",
@@ -465,7 +461,6 @@
     "github.com/sirupsen/logrus",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/require",
-    "golang.org/x/oauth2/google",
     "google.golang.org/api/cloudkms/v1",
     "gopkg.in/urfave/cli.v1",
   ]
