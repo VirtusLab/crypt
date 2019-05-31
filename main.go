@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -11,14 +10,21 @@ import (
 	"github.com/VirtusLab/crypt/crypto"
 	"github.com/VirtusLab/crypt/gcp"
 	"github.com/VirtusLab/crypt/version"
+
+	"github.com/VirtusLab/go-extended/pkg/files"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"gopkg.in/urfave/cli.v1"
 )
 
 var (
-	app        *cli.App
-	inputPath  string
-	outputPath string
+	app                 *cli.App
+	inputFile           string
+	outputFile          string
+	inputDir            string
+	outputDir           string
+	inputFileExtension  string
+	outputFileExtension string
 
 	// Azure kms
 	azureVaultURL   string
@@ -118,33 +124,57 @@ func encrypt() cli.Command {
 				Usage: "Encrypts files and/or strings with Azure Key Vault",
 				Flags: []cli.Flag{
 					cli.StringFlag{
+						Name:        "indir",
+						Value:       "",
+						Usage:       "the input directory, can't be used with --out",
+						Destination: &inputDir,
+					},
+					cli.StringFlag{
+						Name:        "outdir",
+						Value:       "",
+						Usage:       "the output directory, the same as --outdir if empty, can't be used with --in",
+						Destination: &outputDir,
+					},
+					cli.StringFlag{
+						Name:        "in-extension",
+						Value:       "",
+						Usage:       "the extension of input file, used only with --indir",
+						Destination: &inputFileExtension,
+					},
+					cli.StringFlag{
+						Name:        "out-extension",
+						Value:       ".crypt",
+						Usage:       "the extension of output file, used only with --indir",
+						Destination: &outputFileExtension,
+					},
+					cli.StringFlag{
 						Name:        "in, input",
 						Value:       "",
 						Usage:       "the input file to decrypt, stdin if empty",
-						Destination: &inputPath,
+						Destination: &inputFile,
 					},
 					cli.StringFlag{
 						Name:        "out, output",
 						Value:       "",
 						Usage:       "the output file, stdout if empty",
-						Destination: &outputPath,
+						Destination: &outputFile,
 					},
 					cli.StringFlag{
 						Name:        "vaultURL",
 						Value:       "",
-						Usage:       "Azure vault URL",
+						Usage:       "the Azure KeyVault URL",
 						Destination: &azureVaultURL,
 					},
 					cli.StringFlag{
 						Name:        "name",
 						Value:       "",
-						Usage:       "the key name",
+						Usage:       "the Azure KeyVault key name",
 						Destination: &azureKey,
 					},
 					cli.StringFlag{
 						Name:        "version",
 						Value:       "",
-						Usage:       "the key version",
+						Usage:       "the Azure KeyVault key version",
 						Destination: &azureKeyVersion,
 					},
 				},
@@ -158,13 +188,13 @@ func encrypt() cli.Command {
 						Name:        "in, input",
 						Value:       "",
 						Usage:       "the input file to decrypt, stdin if empty",
-						Destination: &inputPath,
+						Destination: &inputFile,
 					},
 					cli.StringFlag{
 						Name:        "out, output",
 						Value:       "",
 						Usage:       "the output file, stdout if empty",
-						Destination: &outputPath,
+						Destination: &outputFile,
 					},
 					cli.StringFlag{
 						Name:        "region",
@@ -195,13 +225,13 @@ func encrypt() cli.Command {
 						Name:        "in, input",
 						Value:       "",
 						Usage:       "the input file to decrypt, stdin if empty",
-						Destination: &inputPath,
+						Destination: &inputFile,
 					},
 					cli.StringFlag{
 						Name:        "out, output",
 						Value:       "",
 						Usage:       "the output file, stdout if empty",
-						Destination: &outputPath,
+						Destination: &outputFile,
 					},
 					cli.StringFlag{
 						Name:        "project",
@@ -234,23 +264,71 @@ func encrypt() cli.Command {
 	}
 }
 
-func encryptAzure(_ *cli.Context) error {
+func action(c *cli.Context, crypt crypto.Crypt, singleFileFunc, directoryFunc func(crypt crypto.Crypt) error) error {
+	if c.NArg() > 0 {
+		return errors.Errorf("have not expected any arguments, got %d", c.NArg())
+	}
+
+	if len(inputDir) > 0 {
+		if len(inputFile) > 0 {
+			return errors.New("conflict, --in can't be used with --indir or --outdir")
+		}
+		if len(outputFile) > 0 {
+			return errors.New("conflict, --out can't be used with --indir or --outdir")
+		}
+		if len(inputFileExtension) == 0 && len(outputFileExtension) == 0 {
+			return errors.New("--in-extension and --out-extension can't be empty")
+		}
+		if len(outputDir) == 0 {
+			outputDir = inputDir
+		}
+
+		return directoryFunc(crypt)
+	}
+
+	if len(inputDir) > 0 {
+		return errors.New("conflict, --indir can't be used with --in or --out")
+	}
+	if len(outputDir) > 0 {
+		return errors.New("conflict, --outdir can't be used with --in or --out")
+	}
+	err := singleFileFunc(crypt)
+	if err != nil && err == files.ErrExpectedStdin {
+		return errors.New("expected either stdin, --indir or --in parameter, for usage use --help")
+	}
+	return err
+}
+
+func encryptAction(c *cli.Context, crypt crypto.Crypt) error {
+	if len(inputDir) > 0 {
+		if len(outputFileExtension) == 0 {
+			return fmt.Errorf("--out-extension can't be empty")
+		}
+	}
+
+	return action(c, crypt, encryptSingleFile, encryptDirectory)
+}
+
+func encryptSingleFile(crypt crypto.Crypt) error {
+	return crypt.EncryptFile(inputFile, outputFile)
+}
+
+func encryptDirectory(crypt crypto.Crypt) error {
+	return crypt.EncryptFiles(inputDir, outputDir, inputFileExtension, outputFileExtension)
+}
+
+func encryptAzure(c *cli.Context) error {
 	azr, err := azure.New(azureVaultURL, azureKey, azureKeyVersion)
 	if err != nil {
 		return err
 	}
-	crypt := crypto.New(azr)
-	err = crypt.EncryptFile(inputPath, outputPath)
-	if err != nil {
-		return err
-	}
-	return nil
+	return encryptAction(c, crypto.New(azr))
 }
 
 func encryptAws(_ *cli.Context) error {
 	amazon := aws.New(awsKms, awsRegion, awsProfile)
 	crypt := crypto.New(amazon)
-	err := crypt.EncryptFile(inputPath, outputPath)
+	err := crypt.EncryptFile(inputFile, outputFile)
 	if err != nil {
 		return err
 	}
@@ -260,7 +338,7 @@ func encryptAws(_ *cli.Context) error {
 func encryptGcp(_ *cli.Context) error {
 	google := gcp.New(gcpProject, gcpLocation, gcpKeyring, gcpKey)
 	crypt := crypto.New(google)
-	err := crypt.EncryptFile(inputPath, outputPath)
+	err := crypt.EncryptFile(inputFile, outputFile)
 	if err != nil {
 		return err
 	}
@@ -278,16 +356,40 @@ func decrypt() cli.Command {
 				Usage: "Decrypts files and/or strings with Azure Key Vault",
 				Flags: []cli.Flag{
 					cli.StringFlag{
+						Name:        "indir",
+						Value:       "",
+						Usage:       "the input directory, can't be used with --out",
+						Destination: &inputDir,
+					},
+					cli.StringFlag{
+						Name:        "outdir",
+						Value:       "",
+						Usage:       "the output directory, the same as --outdir if empty, can't be used with --in",
+						Destination: &outputDir,
+					},
+					cli.StringFlag{
+						Name:        "in-extension",
+						Value:       ".crypt",
+						Usage:       "the extension of input file, used only with --indir",
+						Destination: &inputFileExtension,
+					},
+					cli.StringFlag{
+						Name:        "out-extension",
+						Value:       "",
+						Usage:       "the extension of output file, used only with --indir",
+						Destination: &outputFileExtension,
+					},
+					cli.StringFlag{
 						Name:        "in, input",
 						Value:       "",
 						Usage:       "the input file to decrypt, stdin if empty",
-						Destination: &inputPath,
+						Destination: &inputFile,
 					},
 					cli.StringFlag{
 						Name:        "out, output",
 						Value:       "",
 						Usage:       "the output file, stdout if empty",
-						Destination: &outputPath,
+						Destination: &outputFile,
 					},
 					cli.StringFlag{
 						Name:        "vaultURL",
@@ -318,13 +420,13 @@ func decrypt() cli.Command {
 						Name:        "in, input",
 						Value:       "",
 						Usage:       "the input file to decrypt, stdin if empty",
-						Destination: &inputPath,
+						Destination: &inputFile,
 					},
 					cli.StringFlag{
 						Name:        "out, output",
 						Value:       "",
 						Usage:       "the output file, stdout if empty",
-						Destination: &outputPath,
+						Destination: &outputFile,
 					},
 					cli.StringFlag{
 						Name:        "region",
@@ -354,13 +456,13 @@ func decrypt() cli.Command {
 						Name:        "in, input",
 						Value:       "",
 						Usage:       "the input file to decrypt, stdin if empty",
-						Destination: &inputPath,
+						Destination: &inputFile,
 					},
 					cli.StringFlag{
 						Name:        "out, output",
 						Value:       "",
 						Usage:       "the output file, stdout if empty",
-						Destination: &outputPath,
+						Destination: &outputFile,
 					},
 					cli.StringFlag{
 						Name:        "project",
@@ -393,23 +495,36 @@ func decrypt() cli.Command {
 	}
 }
 
-func decryptAzure(_ *cli.Context) error {
+func decryptAction(c *cli.Context, crypt crypto.Crypt) error {
+	if len(inputDir) > 0 {
+		if len(inputFileExtension) == 0 {
+			return fmt.Errorf("--in-extension can't be empty")
+		}
+	}
+
+	return action(c, crypt, decryptSingleFile, decryptDirectory)
+}
+
+func decryptSingleFile(crypt crypto.Crypt) error {
+	return crypt.DecryptFile(inputFile, outputFile)
+}
+
+func decryptDirectory(crypt crypto.Crypt) error {
+	return crypt.DecryptFiles(inputDir, outputDir, inputFileExtension, outputFileExtension)
+}
+
+func decryptAzure(c *cli.Context) error {
 	azr, err := azure.New(azureVaultURL, azureKey, azureKeyVersion)
 	if err != nil {
 		return err
 	}
-	crypt := crypto.New(azr)
-	err = crypt.DecryptFile(inputPath, outputPath)
-	if err != nil {
-		return err
-	}
-	return nil
+	return decryptAction(c, crypto.New(azr))
 }
 
 func decryptAws(_ *cli.Context) error {
 	amazon := aws.New(awsKms, awsRegion, awsProfile)
 	crypt := crypto.New(amazon)
-	err := crypt.DecryptFile(inputPath, outputPath)
+	err := crypt.DecryptFile(inputFile, outputFile)
 	if err != nil {
 		return err
 	}
@@ -419,7 +534,7 @@ func decryptAws(_ *cli.Context) error {
 func decryptGcp(_ *cli.Context) error {
 	googleKms := gcp.New(gcpProject, gcpLocation, gcpKeyring, gcpKey)
 	crypt := crypto.New(googleKms)
-	err := crypt.DecryptFile(inputPath, outputPath)
+	err := crypt.DecryptFile(inputFile, outputFile)
 	if err != nil {
 		return err
 	}

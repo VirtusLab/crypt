@@ -47,6 +47,8 @@ az keyvault key create --vault-name "${KEY_VAULT_NAME}" --name "example-key2" --
 
 ## Encryption
 
+### Single file
+
 Run the following command:
 
 ```console
@@ -66,7 +68,22 @@ You should have output similar to this:
 INFO Encryption succeeded   key=example-key keyVersion=b3d715d803bb4e3fb07d12701a101dcd
 ```
 
+### Files in directory
+
+```console
+crypt encrypt azure \
+        --indir to-encrypt \
+        --outdir encrypted \
+        --vaultURL https://${KEY_VAULT_NAME}.vault.azure.net \
+        --name example-key \
+        --version b3d715d803bb4e3fb07d12701a101dcd
+```
+
+In directory `encrypted` you should have encrypted files with extension `.crypt`.
+
 ## Decryption
+
+### Single
 
 Run the following command:
  
@@ -85,3 +102,13 @@ You should have output similar to this:
 INFO Decryption succeeded   key=example-key keyVersion=b3d715d803bb4e3fb07d12701a101dcd
 ```
  
+ ### Files in directory
+ 
+ ```console
+ crypt decrypt azure \
+         --indir to-decrypt \
+         --outdir decrypted
+ ```
+ 
+ This command scan all files with extension `.crypt` in folder `to-decrypt` and decrypts it to `decrypted` folder.
+ Decrypted files doesnt't have `.crypt` extension.
