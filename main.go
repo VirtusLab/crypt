@@ -113,6 +113,45 @@ func preload(c *cli.Context) error {
 	return nil
 }
 
+var encryptBaseFlags = []cli.Flag{
+	cli.StringFlag{
+		Name:        "indir",
+		Value:       "",
+		Usage:       "the input directory, can't be used with --out",
+		Destination: &inputDir,
+	},
+	cli.StringFlag{
+		Name:        "outdir",
+		Value:       "",
+		Usage:       "the output directory, the same as --outdir if empty, can't be used with --in",
+		Destination: &outputDir,
+	},
+	cli.StringFlag{
+		Name:        "in-extension",
+		Value:       "",
+		Usage:       "the extension of input file, used only with --indir",
+		Destination: &inputFileExtension,
+	},
+	cli.StringFlag{
+		Name:        "out-extension",
+		Value:       ".crypt",
+		Usage:       "the extension of output file, used only with --indir",
+		Destination: &outputFileExtension,
+	},
+	cli.StringFlag{
+		Name:        "in, input",
+		Value:       "",
+		Usage:       "the input file to decrypt, stdin if empty",
+		Destination: &inputFile,
+	},
+	cli.StringFlag{
+		Name:        "out, output",
+		Value:       "",
+		Usage:       "the output file, stdout if empty",
+		Destination: &outputFile,
+	},
+}
+
 func encrypt() cli.Command {
 	return cli.Command{
 		Name:    "encrypt",
@@ -122,43 +161,7 @@ func encrypt() cli.Command {
 			{
 				Name:  "azure",
 				Usage: "Encrypts files and/or strings with Azure Key Vault",
-				Flags: []cli.Flag{
-					cli.StringFlag{
-						Name:        "indir",
-						Value:       "",
-						Usage:       "the input directory, can't be used with --out",
-						Destination: &inputDir,
-					},
-					cli.StringFlag{
-						Name:        "outdir",
-						Value:       "",
-						Usage:       "the output directory, the same as --outdir if empty, can't be used with --in",
-						Destination: &outputDir,
-					},
-					cli.StringFlag{
-						Name:        "in-extension",
-						Value:       "",
-						Usage:       "the extension of input file, used only with --indir",
-						Destination: &inputFileExtension,
-					},
-					cli.StringFlag{
-						Name:        "out-extension",
-						Value:       ".crypt",
-						Usage:       "the extension of output file, used only with --indir",
-						Destination: &outputFileExtension,
-					},
-					cli.StringFlag{
-						Name:        "in, input",
-						Value:       "",
-						Usage:       "the input file to decrypt, stdin if empty",
-						Destination: &inputFile,
-					},
-					cli.StringFlag{
-						Name:        "out, output",
-						Value:       "",
-						Usage:       "the output file, stdout if empty",
-						Destination: &outputFile,
-					},
+				Flags: append(encryptBaseFlags, []cli.Flag{
 					cli.StringFlag{
 						Name:        "vaultURL",
 						Value:       "",
@@ -177,25 +180,19 @@ func encrypt() cli.Command {
 						Usage:       "the Azure KeyVault key version",
 						Destination: &azureKeyVersion,
 					},
+				}...),
+				Action: func(c *cli.Context) error {
+					azr, err := azure.New(azureVaultURL, azureKey, azureKeyVersion)
+					if err != nil {
+						return err
+					}
+					return encryptAction(c, crypto.New(azr))
 				},
-				Action: encryptAzure,
 			},
 			{
 				Name:  "aws",
 				Usage: "Encrypts files and/or strings with AWS KMS",
-				Flags: []cli.Flag{
-					cli.StringFlag{
-						Name:        "in, input",
-						Value:       "",
-						Usage:       "the input file to decrypt, stdin if empty",
-						Destination: &inputFile,
-					},
-					cli.StringFlag{
-						Name:        "out, output",
-						Value:       "",
-						Usage:       "the output file, stdout if empty",
-						Destination: &outputFile,
-					},
+				Flags: append(encryptBaseFlags, []cli.Flag{
 					cli.StringFlag{
 						Name:        "region",
 						Value:       "",
@@ -214,25 +211,15 @@ func encrypt() cli.Command {
 						Usage:       "the Amazon Resource Name (ARN), alias name, or alias ARN for the customer master key",
 						Destination: &awsKms, // FIXME #2 make this flag required
 					},
+				}...),
+				Action: func(c *cli.Context) error {
+					return encryptAction(c, crypto.New(aws.New(awsKms, awsRegion, awsProfile)))
 				},
-				Action: encryptAws,
 			},
 			{
 				Name:  "gcp",
 				Usage: "Encrypts files and/or strings with GCP KMS",
-				Flags: []cli.Flag{
-					cli.StringFlag{
-						Name:        "in, input",
-						Value:       "",
-						Usage:       "the input file to decrypt, stdin if empty",
-						Destination: &inputFile,
-					},
-					cli.StringFlag{
-						Name:        "out, output",
-						Value:       "",
-						Usage:       "the output file, stdout if empty",
-						Destination: &outputFile,
-					},
+				Flags: append(encryptBaseFlags, []cli.Flag{
 					cli.StringFlag{
 						Name:        "project",
 						Value:       "",
@@ -257,8 +244,10 @@ func encrypt() cli.Command {
 						Usage:       "the cryptographic key name",
 						Destination: &gcpKey, // FIXME #2 make this flag required
 					},
+				}...),
+				Action: func(c *cli.Context) error {
+					return encryptAction(c, crypto.New(gcp.New(gcpProject, gcpLocation, gcpKeyring, gcpKey)))
 				},
-				Action: encryptGcp,
 			},
 		},
 	}
@@ -317,32 +306,43 @@ func encryptDirectory(crypt crypto.Crypt) error {
 	return crypt.EncryptFiles(inputDir, outputDir, inputFileExtension, outputFileExtension)
 }
 
-func encryptAzure(c *cli.Context) error {
-	azr, err := azure.New(azureVaultURL, azureKey, azureKeyVersion)
-	if err != nil {
-		return err
-	}
-	return encryptAction(c, crypto.New(azr))
-}
-
-func encryptAws(_ *cli.Context) error {
-	amazon := aws.New(awsKms, awsRegion, awsProfile)
-	crypt := crypto.New(amazon)
-	err := crypt.EncryptFile(inputFile, outputFile)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func encryptGcp(_ *cli.Context) error {
-	google := gcp.New(gcpProject, gcpLocation, gcpKeyring, gcpKey)
-	crypt := crypto.New(google)
-	err := crypt.EncryptFile(inputFile, outputFile)
-	if err != nil {
-		return err
-	}
-	return nil
+var decryptBaseFlags = []cli.Flag{
+	cli.StringFlag{
+		Name:        "indir",
+		Value:       "",
+		Usage:       "the input directory, can't be used with --out",
+		Destination: &inputDir,
+	},
+	cli.StringFlag{
+		Name:        "outdir",
+		Value:       "",
+		Usage:       "the output directory, the same as --outdir if empty, can't be used with --in",
+		Destination: &outputDir,
+	},
+	cli.StringFlag{
+		Name:        "in-extension",
+		Value:       ".crypt",
+		Usage:       "the extension of input file, used only with --indir",
+		Destination: &inputFileExtension,
+	},
+	cli.StringFlag{
+		Name:        "out-extension",
+		Value:       "",
+		Usage:       "the extension of output file, used only with --indir",
+		Destination: &outputFileExtension,
+	},
+	cli.StringFlag{
+		Name:        "in, input",
+		Value:       "",
+		Usage:       "the input file to decrypt, stdin if empty",
+		Destination: &inputFile,
+	},
+	cli.StringFlag{
+		Name:        "out, output",
+		Value:       "",
+		Usage:       "the output file, stdout if empty",
+		Destination: &outputFile,
+	},
 }
 
 func decrypt() cli.Command {
@@ -354,43 +354,7 @@ func decrypt() cli.Command {
 			{
 				Name:  "azure",
 				Usage: "Decrypts files and/or strings with Azure Key Vault",
-				Flags: []cli.Flag{
-					cli.StringFlag{
-						Name:        "indir",
-						Value:       "",
-						Usage:       "the input directory, can't be used with --out",
-						Destination: &inputDir,
-					},
-					cli.StringFlag{
-						Name:        "outdir",
-						Value:       "",
-						Usage:       "the output directory, the same as --outdir if empty, can't be used with --in",
-						Destination: &outputDir,
-					},
-					cli.StringFlag{
-						Name:        "in-extension",
-						Value:       ".crypt",
-						Usage:       "the extension of input file, used only with --indir",
-						Destination: &inputFileExtension,
-					},
-					cli.StringFlag{
-						Name:        "out-extension",
-						Value:       "",
-						Usage:       "the extension of output file, used only with --indir",
-						Destination: &outputFileExtension,
-					},
-					cli.StringFlag{
-						Name:        "in, input",
-						Value:       "",
-						Usage:       "the input file to decrypt, stdin if empty",
-						Destination: &inputFile,
-					},
-					cli.StringFlag{
-						Name:        "out, output",
-						Value:       "",
-						Usage:       "the output file, stdout if empty",
-						Destination: &outputFile,
-					},
+				Flags: append(decryptBaseFlags, []cli.Flag{
 					cli.StringFlag{
 						Name:        "vaultURL",
 						Value:       "",
@@ -409,25 +373,19 @@ func decrypt() cli.Command {
 						Usage:       "the key version",
 						Destination: &azureKeyVersion,
 					},
+				}...),
+				Action: func(c *cli.Context) error {
+					azr, err := azure.New(azureVaultURL, azureKey, azureKeyVersion)
+					if err != nil {
+						return err
+					}
+					return decryptAction(c, crypto.New(azr))
 				},
-				Action: decryptAzure,
 			},
 			{
 				Name:  "aws",
 				Usage: "Decrypts files and/or strings with AmazonKMS KMS",
-				Flags: []cli.Flag{
-					cli.StringFlag{
-						Name:        "in, input",
-						Value:       "",
-						Usage:       "the input file to decrypt, stdin if empty",
-						Destination: &inputFile,
-					},
-					cli.StringFlag{
-						Name:        "out, output",
-						Value:       "",
-						Usage:       "the output file, stdout if empty",
-						Destination: &outputFile,
-					},
+				Flags: append(decryptBaseFlags, []cli.Flag{
 					cli.StringFlag{
 						Name:        "region",
 						Value:       "",
@@ -440,30 +398,18 @@ func decrypt() cli.Command {
 						Usage:       "the AWS API credentials profile",
 						Destination: &awsProfile,
 					},
-				},
+				}...),
 				Action: func(c *cli.Context) error {
 					if len(awsRegion) == 0 {
 						return errors.New("pass the AWS region")
 					}
-					return decryptAws(c)
+					return decryptAction(c, crypto.New(aws.New(awsKms, awsRegion, awsProfile)))
 				},
 			},
 			{
 				Name:  "gcp",
 				Usage: "Decrypts files and/or strings with GCP KMS",
-				Flags: []cli.Flag{
-					cli.StringFlag{
-						Name:        "in, input",
-						Value:       "",
-						Usage:       "the input file to decrypt, stdin if empty",
-						Destination: &inputFile,
-					},
-					cli.StringFlag{
-						Name:        "out, output",
-						Value:       "",
-						Usage:       "the output file, stdout if empty",
-						Destination: &outputFile,
-					},
+				Flags: append(decryptBaseFlags, []cli.Flag{
 					cli.StringFlag{
 						Name:        "project",
 						Value:       "",
@@ -488,8 +434,10 @@ func decrypt() cli.Command {
 						Usage:       "the cryptographic key name",
 						Destination: &gcpKey, // FIXME #2 make this flag required
 					},
+				}...),
+				Action: func(c *cli.Context) error {
+					return decryptAction(c, crypto.New(gcp.New(gcpProject, gcpLocation, gcpKeyring, gcpKey)))
 				},
-				Action: decryptGcp,
 			},
 		},
 	}
@@ -511,32 +459,4 @@ func decryptSingleFile(crypt crypto.Crypt) error {
 
 func decryptDirectory(crypt crypto.Crypt) error {
 	return crypt.DecryptFiles(inputDir, outputDir, inputFileExtension, outputFileExtension)
-}
-
-func decryptAzure(c *cli.Context) error {
-	azr, err := azure.New(azureVaultURL, azureKey, azureKeyVersion)
-	if err != nil {
-		return err
-	}
-	return decryptAction(c, crypto.New(azr))
-}
-
-func decryptAws(_ *cli.Context) error {
-	amazon := aws.New(awsKms, awsRegion, awsProfile)
-	crypt := crypto.New(amazon)
-	err := crypt.DecryptFile(inputFile, outputFile)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func decryptGcp(_ *cli.Context) error {
-	googleKms := gcp.New(gcpProject, gcpLocation, gcpKeyring, gcpKey)
-	crypt := crypto.New(googleKms)
-	err := crypt.DecryptFile(inputFile, outputFile)
-	if err != nil {
-		return err
-	}
-	return nil
 }
