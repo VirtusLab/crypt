@@ -1,11 +1,10 @@
 package aws
 
 import (
-	"errors"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -42,13 +41,11 @@ func New(key, region, profile string) *KMS {
 // See Crypt.Encrypt
 func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 	if len(k.key) == 0 {
-		logrus.Debugf("Error reading kms: %v", k.key)
-		return nil, ErrKmsMissing
+		return nil, errors.Wrapf(ErrKmsMissing, "error reading kms: %v", k.key)
 	}
 
 	if len(k.region) == 0 {
-		logrus.Debugf("Error reading region: %v", k.region)
-		return nil, ErrRegionMissing
+		return nil, errors.Wrapf(ErrRegionMissing, "error reading region: %v", k.region)
 	}
 
 	if len(k.profile) == 0 {
@@ -68,7 +65,7 @@ func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 	}
 	output, err := svc.Encrypt(input)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	return []byte(output.CiphertextBlob), nil
 }
@@ -77,8 +74,7 @@ func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 // See Crypt.Decrypt
 func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
 	if len(k.region) == 0 {
-		logrus.Debugf("Error reading region: %v", k.region)
-		return nil, ErrRegionMissing
+		return nil, errors.Wrapf(ErrRegionMissing, "error reading region: %v", k.region)
 	}
 
 	if len(k.profile) == 0 {
@@ -97,7 +93,7 @@ func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
 	}
 	output, err := svc.Decrypt(input)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 	return output.Plaintext, nil
 }

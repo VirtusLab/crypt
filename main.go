@@ -87,7 +87,11 @@ func main() {
 	}
 
 	if err := app.Run(os.Args); err != nil {
-		_, _ = fmt.Fprintf(cli.ErrWriter, "ERROR: %v\n", err)
+		if logrus.GetLevel() == logrus.DebugLevel {
+			_, _ = fmt.Fprintf(cli.ErrWriter, "ERROR: %+v\n", err)
+		} else {
+			_, _ = fmt.Fprintf(cli.ErrWriter, "ERROR: %v\n", err)
+		}
 		cli.OsExiter(1)
 	}
 }

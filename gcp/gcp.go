@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"google.golang.org/api/cloudkms/v1"
 )
 
@@ -44,7 +43,7 @@ func New(project, location, keyring, key string) *KMS {
 func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 	err := k.validate()
 	if err != nil {
-		return nil, err
+		return nil, err // err already wrapped in validate function
 	}
 
 	// See https://cloud.google.com/docs/authentication/.
@@ -53,7 +52,7 @@ func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 	ctx := context.Background()
 	kmsService, err := cloudkms.NewService(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error creating gcp cloudkms service")
 	}
 
 	parentName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
@@ -64,7 +63,7 @@ func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 	}
 	resp, err := kmsService.Projects.Locations.KeyRings.CryptoKeys.Encrypt(parentName, req).Do()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "encryption failed")
 	}
 
 	return base64.StdEncoding.DecodeString(resp.Ciphertext)
@@ -75,7 +74,7 @@ func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
 	err := k.validate()
 	if err != nil {
-		return nil, err
+		return nil, err // err already wrapped in validate function
 	}
 
 	// See https://cloud.google.com/docs/authentication/.
@@ -85,7 +84,7 @@ func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
 
 	cloudkmsService, err := cloudkms.NewService(ctx)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error creating gcp cloudkms service")
 	}
 
 	parentName := fmt.Sprintf("projects/%s/locations/%s/keyRings/%s/cryptoKeys/%s",
@@ -96,27 +95,23 @@ func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
 	}
 	resp, err := cloudkmsService.Projects.Locations.KeyRings.CryptoKeys.Decrypt(parentName, req).Do()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "decryption failed")
 	}
 	return base64.StdEncoding.DecodeString(resp.Plaintext)
 }
 
 func (k *KMS) validate() error {
 	if len(k.project) == 0 {
-		logrus.Debugf("Error reading project: %v", k.project)
-		return ErrProjectMissing
+		return errors.Wrapf(ErrProjectMissing, "error reading project: %v", k.project)
 	}
 	if len(k.location) == 0 {
-		logrus.Debugf("Error reading location: %v", k.location)
-		return ErrLocationMissing
+		return errors.Wrapf(ErrLocationMissing, "error reading location: %v", k.location)
 	}
 	if len(k.keyring) == 0 {
-		logrus.Debugf("Error reading keyring: %v", k.keyring)
-		return ErrKeyRingMissing
+		return errors.Wrapf(ErrKeyRingMissing, "error reading keyring: %v", k.keyring)
 	}
 	if len(k.key) == 0 {
-		logrus.Debugf("Error reading key: %v", k.key)
-		return ErrKeyMissing
+		return errors.Wrapf(ErrKeyMissing, "error reading key: %v", k.key)
 	}
 	return nil
 }

@@ -57,7 +57,7 @@ func TestCrypt_EncryptDecryptFileError(t *testing.T) {
 
 	_, err := encryptDecryptSingleFile(crypt, inputFile)
 
-	assert.EqualError(t, err, "open test.txt: no such file or directory")
+	assert.EqualError(t, err, "can't open plaintext file: open test.txt: no such file or directory")
 }
 
 func TestCrypt_EncryptDecryptFiles(t *testing.T) {

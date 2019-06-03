@@ -5,13 +5,13 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 
 	"github.com/VirtusLab/crypt/version"
 
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault/keyvaultapi"
 	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -49,7 +49,7 @@ type KeyVault struct {
 func New(vaultURL, key, keyVersion string) (*KeyVault, error) {
 	client, err := newKeyVaultClient()
 	if err != nil {
-		return nil, err
+		return nil, err // err already wrapped in newKeyVaultClient function
 	}
 	return &KeyVault{
 		client:     client,
@@ -64,8 +64,7 @@ func newKeyVaultClient() (keyvaultapi.BaseClientAPI, error) {
 	vaultClient := keyvault.New()
 	vaultClient.Authorizer, err = auth.NewAuthorizerFromCLI()
 	if err != nil {
-		logrus.WithError(err).Error("failed to create Azure Authorizer")
-		return vaultClient, err
+		return vaultClient, errors.Wrap(err, "failed to create Azure Authorizer")
 	}
 	return vaultClient, nil
 }
@@ -79,7 +78,7 @@ func (k *KeyVault) Encrypt(plaintext []byte) ([]byte, error) {
 func (k *KeyVault) encrypt(plaintext []byte, includeHeader bool) ([]byte, error) {
 	err := k.validate()
 	if err != nil {
-		return nil, err
+		return nil, err // err already wrapped in validate function
 	}
 
 	data := base64.RawURLEncoding.EncodeToString(plaintext)
@@ -87,7 +86,7 @@ func (k *KeyVault) encrypt(plaintext []byte, includeHeader bool) ([]byte, error)
 
 	res, err := k.client.Encrypt(context.Background(), k.vaultURL, k.key, k.keyVersion, p)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	if includeHeader {
@@ -100,7 +99,7 @@ func (k *KeyVault) encrypt(plaintext []byte, includeHeader bool) ([]byte, error)
 
 		metadataBytes, err := json.Marshal(metadata)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "error with marshaling header metadata")
 		}
 		metadataURLEncoded := make([]byte, base64.RawURLEncoding.EncodedLen(len(metadataBytes)))
 		base64.RawURLEncoding.Encode(metadataURLEncoded, metadataBytes)
@@ -116,7 +115,7 @@ func (k *KeyVault) encrypt(plaintext []byte, includeHeader bool) ([]byte, error)
 	}
 	result, err := base64.RawURLEncoding.DecodeString(*res.Result)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error with decoding data")
 	}
 	logrus.WithFields(logrus.Fields{
 		"key":        k.key,
@@ -133,7 +132,7 @@ func (k *KeyVault) Decrypt(ciphertext []byte) ([]byte, error) {
 		logrus.Debug("Cipher text doesn't contains metadata header")
 		err := k.validate()
 		if err != nil {
-			return nil, err
+			return nil, err // err already wrapped in validate function
 		}
 		dataToDecrypt = base64.RawURLEncoding.EncodeToString(ciphertext)
 	} else {
@@ -144,11 +143,11 @@ func (k *KeyVault) Decrypt(ciphertext []byte) ([]byte, error) {
 		metadataURLDecoded := make([]byte, base64.RawURLEncoding.DecodedLen(len(ciphertext[:indexOfSeparator])))
 		_, err := base64.RawURLEncoding.Decode(metadataURLDecoded, ciphertext[:indexOfSeparator])
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "error with decoding header metadata")
 		}
 		err = json.Unmarshal(metadataURLDecoded, &metadata)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "error with unmarshaling header metadata")
 		}
 		k.vaultURL = metadata.AzureKeyVaultURL
 		k.key = metadata.AzureKeyVaultKeyName
@@ -159,12 +158,12 @@ func (k *KeyVault) Decrypt(ciphertext []byte) ([]byte, error) {
 
 	res, err := k.client.Decrypt(context.Background(), k.vaultURL, k.key, k.keyVersion, p)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithStack(err)
 	}
 
 	plaintext, err := base64.RawURLEncoding.DecodeString(*res.Result)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error with decoding data")
 	}
 
 	logrus.WithFields(logrus.Fields{
@@ -178,16 +177,13 @@ func (k *KeyVault) Decrypt(ciphertext []byte) ([]byte, error) {
 
 func (k *KeyVault) validate() error {
 	if len(k.vaultURL) == 0 {
-		logrus.Debugf("Error reading vaultURL: %v", k.vaultURL)
-		return ErrVaultURLMissing
+		return errors.Wrapf(ErrVaultURLMissing, "error reading vaultURL: %v", k.vaultURL)
 	}
 	if len(k.key) == 0 {
-		logrus.Debugf("Error reading key: %v", k.key)
-		return ErrKeyMissing
+		return errors.Wrapf(ErrKeyMissing, "error reading key: %v", k.key)
 	}
 	if len(k.keyVersion) == 0 {
-		logrus.Debugf("Error reading keyVersion: %v", k.keyVersion)
-		return ErrKeyVersionMissing
+		return errors.Wrapf(ErrKeyVersionMissing, "error reading keyVersion: %v", k.keyVersion)
 	}
 	return nil
 }

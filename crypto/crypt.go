@@ -127,18 +127,15 @@ func (c *crypt) DecryptFiles(inputDir, outputDir, inputExtension, outputExtensio
 func (c *crypt) EncryptFile(inputPath, outputPath string) error {
 	input, err := files.ReadInput(inputPath)
 	if err != nil {
-		logrus.Debugf("Can't open plaintext file: %v", err)
-		return err
+		return errors.Wrap(err, "can't open plaintext file")
 	}
 	result, err := c.Encrypt(input)
 	if err != nil {
-		logrus.Debugf("Encrypting failed: %s", err)
-		return err
+		return errors.Wrapf(err, "encrypting failed, file '%s'", inputPath)
 	}
 	err = files.WriteOutput(outputPath, result, 0644) // 0644 - user: read&write, group: read, other: read
 	if err != nil {
-		logrus.Debugf("Can't save the encrypted file: %v", err)
-		return err
+		return errors.Wrapf(err, "can't save the encrypted file '%s'", outputPath)
 	}
 	return nil
 }
@@ -149,18 +146,15 @@ func (c *crypt) EncryptFile(inputPath, outputPath string) error {
 func (c *crypt) DecryptFile(inputPath, outputPath string) error {
 	input, err := files.ReadInput(inputPath)
 	if err != nil {
-		logrus.Debugf("Can't open encrypted file: %v", err)
-		return err
+		return errors.Wrap(err, "can't open encrypted file")
 	}
 	result, err := c.Decrypt(input)
 	if err != nil {
-		logrus.Debugf("Decrypting failed: %s", err)
-		return err
+		return errors.Wrapf(err, "decrypting failed, file '%s'", inputPath)
 	}
 	err = files.WriteOutput(outputPath, result, 0644) // 0644 - user: read&write, group: read, other: read
 	if err != nil {
-		logrus.Debugf("Can't save the decrypted file: %v", err)
-		return err
+		return errors.Wrapf(err, "can't save the decrypted file '%s'", outputPath)
 	}
 	return nil
 }
