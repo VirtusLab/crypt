@@ -46,10 +46,12 @@ func New(crypter Crypter) Crypt {
 	return &crypt{crypter: crypter}
 }
 
-func encryptOrDecryptFiles(
+func transformFiles(
 	inputDir, outputDir, inputExtension, outputExtension string,
-	encryptDecryptFunc func(inputPath, outputPath string) error,
-	getTargetFileFunc func(file files.FileEntry, inputExtension, outputExtension string) files.FileEntry) error {
+	inputFilterFunc func(file files.FileEntry, inputExtension string) bool,
+	transformFunc func(inputPath, outputPath string) error,
+	outputFilenameFunc func(file files.FileEntry, inputExtension, outputExtension string) files.FileEntry) error {
+
 	logrus.Infof("Directory mode selected: '%s' -> '%s'", inputDir, outputDir)
 
 	fileEntries, err := files.DirTree(inputDir)
@@ -58,13 +60,13 @@ func encryptOrDecryptFiles(
 	}
 
 	for _, file := range fileEntries {
-		if len(inputExtension) > 0 && inputExtension != file.Extension {
+		if inputFilterFunc(file, inputExtension) {
 			logrus.Debugf("Skipping '%s'", path.Join(file.Path, file.Name))
 			continue
 		}
 		logrus.Debugf("Processing '%s'", path.Join(file.Path, file.Name))
 
-		target := getTargetFileFunc(file, inputExtension, outputExtension)
+		target := outputFilenameFunc(file, inputExtension, outputExtension)
 
 		rel, err := filepath.Rel(inputDir, file.Path)
 		if err != nil {
@@ -73,18 +75,13 @@ func encryptOrDecryptFiles(
 
 		target.Path = path.Join(outputDir, rel)
 
-		_, err = os.Stat(target.Path)
-		if os.IsNotExist(err) {
-			err := os.MkdirAll(target.Path, os.ModePerm)
-			if err != nil {
-				return errors.Wrapf(err, "can't create the target directory: '%s'", target.Path)
-			}
-			logrus.Infof("Target directory was created: '%s'", target.Path)
-		} else if err != nil {
-			return errors.Wrapf(err, "can't get file information for '%s'", target.Path)
+		err = os.MkdirAll(target.Path, os.ModePerm)
+		if err != nil {
+			return errors.Wrapf(err, "can't create the target directory: '%s'", target.Path)
 		}
+		logrus.Infof("Target directory was created: '%s'", target.Path)
 
-		err = encryptDecryptFunc(path.Join(file.Path, file.Name), path.Join(target.Path, target.Name))
+		err = transformFunc(path.Join(file.Path, file.Name), path.Join(target.Path, target.Name))
 		if err != nil {
 			return errors.Wrap(err, "can't encrypt/decrypt a file")
 		}
@@ -93,8 +90,14 @@ func encryptOrDecryptFiles(
 	return nil
 }
 
+func inputFilterFunc(file files.FileEntry, inputExtension string) bool {
+	return len(inputExtension) > 0 && inputExtension != file.Extension
+}
+
+// EncryptFiles encrypts files from a directory using EncryptFile function
 func (c *crypt) EncryptFiles(inputDir, outputDir, inputExtension, outputExtension string) error {
-	targetFunc := func(file files.FileEntry, inputExtension, outputExtension string) files.FileEntry {
+	// FIXME @tsek this does not support all use cases
+	outputFunc := func(file files.FileEntry, inputExtension, outputExtension string) files.FileEntry {
 		fileEntry := files.FileEntry{
 			Path: file.Path,
 			Name: file.Name + outputExtension,
@@ -102,11 +105,13 @@ func (c *crypt) EncryptFiles(inputDir, outputDir, inputExtension, outputExtensio
 		fileEntry.Extension = filepath.Ext(fileEntry.Name)
 		return fileEntry
 	}
-	return encryptOrDecryptFiles(inputDir, outputDir, inputExtension, outputExtension, c.EncryptFile, targetFunc)
+	return transformFiles(inputDir, outputDir, inputExtension, outputExtension, inputFilterFunc, c.EncryptFile, outputFunc)
 }
 
+// DecryptFiles decrypts files from a directory using DecryptFile function
 func (c *crypt) DecryptFiles(inputDir, outputDir, inputExtension, outputExtension string) error {
-	targetFunc := func(file files.FileEntry, inputExtension, outputExtension string) files.FileEntry {
+	// FIXME @tsek this does not support all use cases
+	outputFunc := func(file files.FileEntry, inputExtension, outputExtension string) files.FileEntry {
 		if len(inputExtension) == 0 {
 			fileEntry := files.FileEntry{
 				Path: file.Path,
@@ -117,7 +122,7 @@ func (c *crypt) DecryptFiles(inputDir, outputDir, inputExtension, outputExtensio
 		}
 		return files.TrimExtension(file, []string{inputExtension})
 	}
-	return encryptOrDecryptFiles(inputDir, outputDir, inputExtension, outputExtension, c.DecryptFile, targetFunc)
+	return transformFiles(inputDir, outputDir, inputExtension, outputExtension, inputFilterFunc, c.DecryptFile, outputFunc)
 }
 
 // EncryptFile encrypts bytes from a file or stdin using a Crypter provider
