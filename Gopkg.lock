@@ -50,12 +50,12 @@
   version = "v12.1.0"
 
 [[projects]]
-  digest = "1:0b9721924611fc12d167bf850599e6199ce18611d0aadde515e4a12ca45b21f0"
+  digest = "1:8eb31716380b55b5595b13b5ba12c02178ce8cb7fad3145fdb79fdad91c9863b"
   name = "github.com/VirtusLab/go-extended"
   packages = ["pkg/files"]
   pruneopts = "UT"
-  revision = "59e3991ac58f3aca978e58cda5dd91cc5186d33d"
-  version = "v0.0.5"
+  revision = "f553176329ce2ba45adb0952c87f805b034c8d97"
+  version = "v0.0.6"
 
 [[projects]]
   digest = "1:14bd1cb06669a67e8f06b1ade750c981b44df6b6a4117bc1936c29fc03b54dd5"
