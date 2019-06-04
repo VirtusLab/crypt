@@ -94,35 +94,42 @@ func inputFilterFunc(file files.FileEntry, inputExtension string) bool {
 	return len(inputExtension) > 0 && inputExtension != file.Extension
 }
 
+func addExtension(file files.FileEntry, extension string) files.FileEntry {
+	fileEntry := files.FileEntry{
+		Path: file.Path,
+		Name: file.Name + extension,
+	}
+	fileEntry.Extension = filepath.Ext(fileEntry.Name)
+	return fileEntry
+}
+
+func outputFilenameForEncryption(file files.FileEntry, inputExtension, outputExtension string) files.FileEntry {
+	if inputExtension == outputExtension {
+		return file
+	}
+	return addExtension(file, outputExtension)
+}
+
 // EncryptFiles encrypts files from a directory using EncryptFile function
 func (c *crypt) EncryptFiles(inputDir, outputDir, inputExtension, outputExtension string) error {
-	// FIXME @tsek this does not support all use cases
-	outputFunc := func(file files.FileEntry, inputExtension, outputExtension string) files.FileEntry {
-		fileEntry := files.FileEntry{
-			Path: file.Path,
-			Name: file.Name + outputExtension,
-		}
-		fileEntry.Extension = filepath.Ext(fileEntry.Name)
-		return fileEntry
+	return transformFiles(inputDir, outputDir, inputExtension, outputExtension,
+		inputFilterFunc, c.EncryptFile, outputFilenameForEncryption)
+}
+
+func outputFilenameForDecryption(file files.FileEntry, inputExtension, outputExtension string) files.FileEntry {
+	if inputExtension == outputExtension {
+		return file
 	}
-	return transformFiles(inputDir, outputDir, inputExtension, outputExtension, inputFilterFunc, c.EncryptFile, outputFunc)
+	if len(inputExtension) > 0 && len(outputExtension) == 0 {
+		return files.TrimExtension(file, []string{inputExtension})
+	}
+	return addExtension(file, outputExtension)
 }
 
 // DecryptFiles decrypts files from a directory using DecryptFile function
 func (c *crypt) DecryptFiles(inputDir, outputDir, inputExtension, outputExtension string) error {
-	// FIXME @tsek this does not support all use cases
-	outputFunc := func(file files.FileEntry, inputExtension, outputExtension string) files.FileEntry {
-		if len(inputExtension) == 0 {
-			fileEntry := files.FileEntry{
-				Path: file.Path,
-				Name: file.Name + outputExtension,
-			}
-			fileEntry.Extension = filepath.Ext(fileEntry.Name)
-			return fileEntry
-		}
-		return files.TrimExtension(file, []string{inputExtension})
-	}
-	return transformFiles(inputDir, outputDir, inputExtension, outputExtension, inputFilterFunc, c.DecryptFile, outputFunc)
+	return transformFiles(inputDir, outputDir, inputExtension, outputExtension,
+		inputFilterFunc, c.DecryptFile, outputFilenameForDecryption)
 }
 
 // EncryptFile encrypts bytes from a file or stdin using a Crypter provider

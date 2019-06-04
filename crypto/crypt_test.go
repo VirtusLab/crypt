@@ -110,3 +110,165 @@ func TestCrypt_DecryptFiles(t *testing.T) {
 	_, err = os.Lstat(path.Join(decryptedFilesDir, skipMeFileName))
 	assert.EqualError(t, err, "lstat decryptedFiles/skip-me.txt: no such file or directory")
 }
+
+func Test_outputFilenameForEncryption(t *testing.T) {
+	t.Run("inputExtension equals outputExtension", func(t *testing.T) {
+		inputExtension := ".crypt"
+		outputExtension := inputExtension
+		file := files.FileEntry{
+			Name:      "example.crypt",
+			Extension: ".crypt",
+		}
+
+		got := outputFilenameForEncryption(file, inputExtension, outputExtension)
+
+		assert.Equal(t, file.Name, got.Name)
+		assert.Equal(t, file.Extension, got.Extension)
+	})
+	t.Run("inputExtension and outputExtension are empty", func(t *testing.T) {
+		inputExtension := ""
+		outputExtension := inputExtension
+		file := files.FileEntry{
+			Name:      "example.txt",
+			Extension: ".txt",
+		}
+
+		got := outputFilenameForEncryption(file, inputExtension, outputExtension)
+
+		assert.Equal(t, file.Name, got.Name)
+		assert.Equal(t, file.Extension, got.Extension)
+	})
+	t.Run("inputExtension not empty and outputExtension is empty", func(t *testing.T) {
+		inputExtension := ".crypt"
+		outputExtension := ""
+		file := files.FileEntry{
+			Name:      "example.crypt",
+			Extension: ".crypt",
+		}
+
+		got := outputFilenameForEncryption(file, inputExtension, outputExtension)
+
+		assert.Equal(t, file.Name, got.Name)
+		assert.Equal(t, file.Extension, got.Extension)
+	})
+	t.Run("inputExtension is empty and outputExtension is empty", func(t *testing.T) {
+		inputExtension := ""
+		outputExtension := ""
+		file := files.FileEntry{
+			Name:      "example.crypt",
+			Extension: ".crypt",
+		}
+
+		got := outputFilenameForEncryption(file, inputExtension, outputExtension)
+
+		assert.Equal(t, file.Name, got.Name)
+		assert.Equal(t, file.Extension, got.Extension)
+	})
+	t.Run("inputExtension is empty and outputExtension is not empty", func(t *testing.T) {
+		inputExtension := ""
+		outputExtension := ".crypt"
+		file := files.FileEntry{
+			Name:      "example.txt",
+			Extension: ".txt",
+		}
+
+		got := outputFilenameForEncryption(file, inputExtension, outputExtension)
+
+		assert.Equal(t, "example.txt.crypt", got.Name)
+		assert.Equal(t, outputExtension, got.Extension)
+	})
+	t.Run("inputExtension is not empty and outputExtension is not empty", func(t *testing.T) {
+		inputExtension := ".secret"
+		outputExtension := ".crypt"
+		file := files.FileEntry{
+			Name:      "example.secret",
+			Extension: ".secret",
+		}
+
+		got := outputFilenameForEncryption(file, inputExtension, outputExtension)
+
+		assert.Equal(t, "example.secret.crypt", got.Name)
+		assert.Equal(t, outputExtension, got.Extension)
+	})
+}
+
+func Test_outputFilenameForDecryption(t *testing.T) {
+	t.Run("inputExtension equals outputExtension", func(t *testing.T) {
+		inputExtension := ".crypt"
+		outputExtension := inputExtension
+		file := files.FileEntry{
+			Name:      "example.crypt",
+			Extension: ".crypt",
+		}
+
+		got := outputFilenameForDecryption(file, inputExtension, outputExtension)
+
+		assert.Equal(t, file.Name, got.Name)
+		assert.Equal(t, file.Extension, got.Extension)
+	})
+	t.Run("inputExtension and outputExtension are empty", func(t *testing.T) {
+		inputExtension := ""
+		outputExtension := inputExtension
+		file := files.FileEntry{
+			Name:      "example.txt",
+			Extension: ".txt",
+		}
+
+		got := outputFilenameForDecryption(file, inputExtension, outputExtension)
+
+		assert.Equal(t, file.Name, got.Name)
+		assert.Equal(t, file.Extension, got.Extension)
+	})
+	t.Run("inputExtension not empty and outputExtension is empty", func(t *testing.T) {
+		inputExtension := ".crypt"
+		outputExtension := ""
+		file := files.FileEntry{
+			Name:      "example.crypt",
+			Extension: ".crypt",
+		}
+
+		got := outputFilenameForDecryption(file, inputExtension, outputExtension)
+
+		assert.Equal(t, "example", got.Name)
+		assert.Equal(t, "", got.Extension)
+	})
+	t.Run("inputExtension is empty and outputExtension is empty", func(t *testing.T) {
+		inputExtension := ""
+		outputExtension := ""
+		file := files.FileEntry{
+			Name:      "example.crypt",
+			Extension: ".crypt",
+		}
+
+		got := outputFilenameForDecryption(file, inputExtension, outputExtension)
+
+		assert.Equal(t, file.Name, got.Name)
+		assert.Equal(t, file.Extension, got.Extension)
+	})
+	t.Run("inputExtension is empty and outputExtension is not empty", func(t *testing.T) {
+		inputExtension := ""
+		outputExtension := ".crypt"
+		file := files.FileEntry{
+			Name:      "example.txt",
+			Extension: ".txt",
+		}
+
+		got := outputFilenameForDecryption(file, inputExtension, outputExtension)
+
+		assert.Equal(t, "example.txt.crypt", got.Name)
+		assert.Equal(t, outputExtension, got.Extension)
+	})
+	t.Run("inputExtension is not empty and outputExtension is not empty", func(t *testing.T) {
+		inputExtension := ".secret"
+		outputExtension := ".crypt"
+		file := files.FileEntry{
+			Name:      "example.secret",
+			Extension: ".secret",
+		}
+
+		got := outputFilenameForDecryption(file, inputExtension, outputExtension)
+
+		assert.Equal(t, "example.secret.crypt", got.Name)
+		assert.Equal(t, outputExtension, got.Extension)
+	})
+}

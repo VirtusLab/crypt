@@ -269,8 +269,13 @@ func action(c *cli.Context, crypt crypto.Crypt, singleFileFunc, directoryFunc fu
 		if len(outputFile) > 0 {
 			return errors.New("conflict, --out can't be used with --indir or --outdir")
 		}
-		if len(inputFileExtension) == 0 && len(outputFileExtension) == 0 {
-			return errors.New("--in-extension and --out-extension can't be empty")
+		if inputDir == outputDir {
+			if len(inputFileExtension) == 0 && len(outputFileExtension) == 0 {
+				return errors.New("--in-extension and --out-extension can't be empty when --indir and --outdir are equal")
+			}
+			if inputFileExtension == outputFileExtension {
+				return errors.New("--in-extension and --out-extension can't be the same when --indir and --outdir are equal")
+			}
 		}
 		if len(outputDir) == 0 {
 			outputDir = inputDir
