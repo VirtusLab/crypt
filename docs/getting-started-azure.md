@@ -47,19 +47,30 @@ az keyvault key create --vault-name "${KEY_VAULT_NAME}" --name "example-key2" --
 
 ## Encryption
 
-### Single file
+### stdin
 
-Run the following command:
+Example usage with `stdin`:
+
+```console
+echo "top secret" | crypt encrypt azure \
+    --out file.enc \
+    --region eu-west-1 \
+    --vaultURL https://${KEY_VAULT_NAME}.vault.azure.net \
+    --name example-key \
+    --version b3d715d803bb4e3fb07d12701a101dcd
+```
+
+### Single file
 
 ```console
 echo "top secret" > file.txt
 
 crypt encrypt azure \
-        --in file.txt \
-        --out file.enc \
-        --vaultURL https://${KEY_VAULT_NAME}.vault.azure.net \
-        --name example-key \
-        --version b3d715d803bb4e3fb07d12701a101dcd
+    --in file.txt \
+    --out file.enc \
+    --vaultURL https://${KEY_VAULT_NAME}.vault.azure.net \
+    --name example-key \
+    --version b3d715d803bb4e3fb07d12701a101dcd
 ```
 
 You should have output similar to this:
@@ -72,20 +83,18 @@ INFO Encryption succeeded   key=example-key keyVersion=b3d715d803bb4e3fb07d12701
 
 ```console
 crypt encrypt azure \
-        --indir to-encrypt \
-        --outdir encrypted \
-        --vaultURL https://${KEY_VAULT_NAME}.vault.azure.net \
-        --name example-key \
-        --version b3d715d803bb4e3fb07d12701a101dcd
+    --indir to-encrypt \
+    --outdir encrypted \
+    --vaultURL https://${KEY_VAULT_NAME}.vault.azure.net \
+    --name example-key \
+    --version b3d715d803bb4e3fb07d12701a101dcd
 ```
 
 In directory `encrypted` you should have encrypted files with extension `.crypt`.
 
 ## Decryption
 
-### Single
-
-Run the following command:
+### Single file
  
 ```console
 crypt decrypt azure \
@@ -105,9 +114,9 @@ INFO Decryption succeeded   key=example-key keyVersion=b3d715d803bb4e3fb07d12701
  ### Files in directory
  
  ```console
- crypt decrypt azure \
-         --indir to-decrypt \
-         --outdir decrypted
+crypt decrypt azure \
+    --indir to-decrypt \
+    --outdir decrypted
  ```
  
  This command scan all files with extension `.crypt` in folder `to-decrypt` and decrypts it to `decrypted` folder.
