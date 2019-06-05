@@ -124,9 +124,17 @@ integrationtest: export GOOGLE_APPLICATION_CREDENTIALS = $(GOOGLE_APPLICATION_CR
 integrationtest: export VAULT_URL = $(VAULT_URL_IT)
 integrationtest: export VAULT_KEY = $(VAULT_KEY_IT)
 integrationtest: export VAULT_KEY_VERSION = $(VAULT_KEY_VERSION_IT)
-integrationtest: ## Runs the go tests
+integrationtest: ## Runs the integration tests
 	@echo "+ $@"
 	@go test -v -tags "$(BUILDTAGS) cgo integration" $(PACKAGES)
+
+.PHONY: e2e
+e2e: export VAULT_URL = $(VAULT_URL_IT)
+e2e: export VAULT_KEY = $(VAULT_KEY_IT)
+e2e: export VAULT_KEY_VERSION = $(VAULT_KEY_VERSION_IT)
+e2e: build ## Runs the e2e tests
+	@echo "+ $@"
+	@go test -v -tags "$(BUILDTAGS) cgo e2e" $(PACKAGES)
 
 .PHONY: vet
 vet: ## Verifies `go vet` passes

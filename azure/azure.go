@@ -192,7 +192,7 @@ func (k *KeyVault) validate() error {
 }
 
 func init() {
-	fileContentPrefix := []byte(`{"provider":"az","crypt":"`)
+	fileContentPrefix := []byte(`{"provider":"az","crypt"`)
 	magicNumber = make([]byte, base64.RawURLEncoding.EncodedLen(len(fileContentPrefix)))
 	base64.RawURLEncoding.Encode(magicNumber, fileContentPrefix)
 }

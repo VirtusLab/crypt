@@ -50,9 +50,13 @@
   version = "v12.1.0"
 
 [[projects]]
-  digest = "1:8eb31716380b55b5595b13b5ba12c02178ce8cb7fad3145fdb79fdad91c9863b"
+  digest = "1:f8cf154803dc4db69191ac7bb34d9d56b796bad517c71dc921f5e8e42dc827c8"
   name = "github.com/VirtusLab/go-extended"
-  packages = ["pkg/files"]
+  packages = [
+    "pkg/cli",
+    "pkg/files",
+    "pkg/log",
+  ]
   pruneopts = "UT"
   revision = "f553176329ce2ba45adb0952c87f805b034c8d97"
   version = "v0.0.6"
@@ -453,6 +457,7 @@
     "github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault/keyvaultapi",
     "github.com/Azure/azure-sdk-for-go/services/keyvault/auth",
     "github.com/Azure/go-autorest/autorest",
+    "github.com/VirtusLab/go-extended/pkg/cli",
     "github.com/VirtusLab/go-extended/pkg/files",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/session",
