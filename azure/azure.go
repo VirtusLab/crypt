@@ -16,11 +16,12 @@ import (
 )
 
 const (
+	providerName                        = "az"
 	encryptedFileMetadataSeparator byte = '.'
 )
 
 var (
-	magicNumbers []byte
+	magicNumber []byte
 	// ErrVaultURLMissing - this is the custom error, returned when vault url is missing
 	ErrVaultURLMissing = errors.New("key vault URL is empty or missing")
 	// ErrKeyMissing = this is the custom error, returned when the KeyVault key is missing
@@ -31,6 +32,7 @@ var (
 
 // MetadataHeader holds information about KeyVault key used to encrypt
 type MetadataHeader struct {
+	Provider                string `json:"provider"`
 	CryptVersion            string `json:"crypt"`
 	AzureKeyVaultURL        string `json:"kvURL"`
 	AzureKeyVaultKeyName    string `json:"kvKey"`
@@ -91,6 +93,7 @@ func (k *KeyVault) encrypt(plaintext []byte, includeHeader bool) ([]byte, error)
 
 	if includeHeader {
 		metadata := MetadataHeader{
+			Provider:                providerName,
 			CryptVersion:            version.VERSION,
 			AzureKeyVaultURL:        k.vaultURL,
 			AzureKeyVaultKeyName:    k.key,
@@ -128,7 +131,7 @@ func (k *KeyVault) encrypt(plaintext []byte, includeHeader bool) ([]byte, error)
 // See Crypt.EncryptFile
 func (k *KeyVault) Decrypt(ciphertext []byte) ([]byte, error) {
 	var dataToDecrypt string
-	if !bytes.HasPrefix(ciphertext, magicNumbers) {
+	if !bytes.HasPrefix(ciphertext, magicNumber) {
 		logrus.Debug("Cipher text doesn't contains metadata header")
 		err := k.validate()
 		if err != nil {
@@ -189,7 +192,7 @@ func (k *KeyVault) validate() error {
 }
 
 func init() {
-	fileContentPrefix := []byte("{\"crypt\":")
-	magicNumbers = make([]byte, base64.RawURLEncoding.EncodedLen(len(fileContentPrefix)))
-	base64.RawURLEncoding.Encode(magicNumbers, fileContentPrefix)
+	fileContentPrefix := []byte(`{"provider":"az","crypt":"`)
+	magicNumber = make([]byte, base64.RawURLEncoding.EncodedLen(len(fileContentPrefix)))
+	base64.RawURLEncoding.Encode(magicNumber, fileContentPrefix)
 }
