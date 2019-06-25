@@ -29,16 +29,30 @@ Azure Key Vault | `alpha`
 
 #### Binaries
 
-For binaries please visit the [Releases Page](https://github.com/VirtusLab/crypt/releases).
+Downloading binaries with `bash`:
+
+    OS=$(uname -s | tr '[A-Z]' '[a-z]')
+    ARCH=amd64
+    curl -SLf# -o ${HOME}/bin/crypt https://github.com/VirtusLab/crypt/releases/download/v0.2.1/crypt-${OS}-${ARCH}
+    chmod +x ${HOME}/bin/crypt
+    crypt --version
+
+Popular links:
+
+- [Mac OS 64 bit](https://github.com/VirtusLab/crypt/releases/download/v0.2.1/crypt-darwin-amd64)
+- [Linux 64 bit](https://github.com/VirtusLab/crypt/releases/download/v0.2.1/crypt-linux-amd64)
+- [Windows 64 bit](https://github.com/VirtusLab/crypt/releases/download/v0.2.1/crypt-windows-amd64)
+
+For more binaries please **visit the [Releases Page](https://github.com/VirtusLab/crypt/releases)**.
 
 #### Via Go
 
-    $ go get github.com/VirtusLab/crypt
+    go get github.com/VirtusLab/crypt
     
 #### Via Homebrew
 
     # Will be installed as cloudcrypt
-    $ brew tap virtuslab/cloud && brew install cloudcrypt
+    brew tap virtuslab/cloud && brew install cloudcrypt
 
 ## Usage
 
