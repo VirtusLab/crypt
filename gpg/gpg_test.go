@@ -11,11 +11,13 @@ func TestEncryptDecryptWithKeys(t *testing.T) {
 	publicKey, err := ioutil.TempFile(os.TempDir(), "public-*.gpg")
 	require.NoError(t, err)
 	publicKey.Write([]byte(PublicKey))
+	defer publicKey.Close()
 	defer os.Remove(publicKey.Name())
 
 	privateKey, err := ioutil.TempFile(os.TempDir(), "private-*.gpg")
 	require.NoError(t, err)
 	privateKey.Write([]byte(PrivateKey))
+	defer privateKey.Close()
 	defer os.Remove(privateKey.Name())
 
 	gnupg, err := New(privateKey.Name(), privateKey.Name(), "")

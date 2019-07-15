@@ -22,8 +22,9 @@ Universal cryptographic tool with AWS KMS, GCP KMS and Azure Key Vault support.
 Provider        | Maturity
 ----------------|---------
 AWS KMS         | `beta`
+Azure Key Vault | `beta`
 GCP KMS         | `alpha`
-Azure Key Vault | `alpha`
+GCP (GnuPG)     | `alpha`
 
 ## Installation
 
@@ -82,9 +83,10 @@ For more binaries please **visit the [Releases Page](https://github.com/VirtusLa
 
 Please find usage examples below:
 
-- [Getting Started with AWS](docs/getting-started-aws.md)
-- [Getting Started with Azure](docs/getting-started-azure.md)
-- [Getting Started with GCP](docs/getting-started-gcp.md)
+- [Getting Started with AWS KMS](docs/getting-started-aws.md)
+- [Getting Started with Azure Key Vault](docs/getting-started-azure.md)
+- [Getting Started with Google GCP KMS](docs/getting-started-gcp.md)
+- [Getting Started with GPG (GnuPG)](docs/getting-started-gpg.md)
 
 ## Development
 
@@ -105,7 +107,7 @@ Please find usage examples below:
 
 ### Integration testing
 
-Update properties in `Makfile` if necessary and run:
+Update properties in the `Makefile` and run:
 
     make integrationtest
     

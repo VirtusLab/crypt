@@ -1,7 +1,9 @@
 # Getting started with GPG
 
 This document describes step by step guide how to use `crypt` with GPG (GnuPG).
-Current implementation support encryption and decryption using armored keys.
+
+Current implementation supports encryption and decryption using armored keys only.
+Support for keyring is planned in the next release.
 
 ## Generate keys
 
@@ -36,7 +38,3 @@ Run this command to export your GPG Private Key (armored):
 Decrypt:
 
     crypt decrypt --private-key my-private-key.asc --in test.enc
-   
-## TODO:
-
-- implement support for the keyring
