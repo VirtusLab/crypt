@@ -40,3 +40,7 @@
 [[constraint]]
   name = "github.com/VirtusLab/go-extended"
   version = "v0.0.6"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/crypto"

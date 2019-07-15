@@ -11,6 +11,7 @@ import (
 	"github.com/VirtusLab/crypt/gcp"
 	"github.com/VirtusLab/crypt/version"
 
+	"github.com/VirtusLab/crypt/gpg"
 	"github.com/VirtusLab/go-extended/pkg/files"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -46,6 +47,13 @@ var (
 	awsRegion string
 	// The AWS API credentials profile to use
 	awsProfile string
+
+	// GPG Public Key (armored)
+	gpgPublicKey string
+	// GPG Private Key (armored)
+	gpgPrivateKey string
+	// GPG Private Key passphrase
+	gpgPrivateKeyPassphrase string
 )
 
 func main() {
@@ -253,6 +261,25 @@ func encrypt() cli.Command {
 					return encryptAction(c, crypto.New(gcp.New(gcpProject, gcpLocation, gcpKeyring, gcpKey)))
 				},
 			},
+			{
+				Name:  "gpg",
+				Usage: "Encrypts files and/or strings with GPG (GnuPG)",
+				Flags: append(encryptBaseFlags, []cli.Flag{
+					cli.StringFlag{
+						Name:        "public-key",
+						Value:       "",
+						Usage:       "the public key path",
+						Destination: &gpgPublicKey, // FIXME #2 make this flag required
+					},
+				}...),
+				Action: func(c *cli.Context) error {
+					gnupg, err := gpg.New(gpgPublicKey, "", "")
+					if err != nil {
+						return err
+					}
+					return encryptAction(c, crypto.New(gnupg))
+				},
+			},
 		},
 	}
 }
@@ -446,6 +473,37 @@ func decrypt() cli.Command {
 				}...),
 				Action: func(c *cli.Context) error {
 					return decryptAction(c, crypto.New(gcp.New(gcpProject, gcpLocation, gcpKeyring, gcpKey)))
+				},
+			},
+			{
+				Name:  "gpg",
+				Usage: "Decrypts files and/or strings with GPG (GnuPG)",
+				Flags: append(encryptBaseFlags, []cli.Flag{
+					cli.StringFlag{
+						Name:        "passphrase",
+						Value:       "",
+						Usage:       "the passphrase key passphrase",
+						Destination: &gpgPrivateKeyPassphrase, // FIXME #2 make this flag required
+					},
+					cli.StringFlag{
+						Name:        "public-key",
+						Value:       "",
+						Usage:       "the public key path",
+						Destination: &gpgPublicKey, // FIXME #2 make this flag required
+					},
+					cli.StringFlag{
+						Name:        "private-key",
+						Value:       "",
+						Usage:       "the private key path",
+						Destination: &gpgPrivateKey, // FIXME #2 make this flag required
+					},
+				}...),
+				Action: func(c *cli.Context) error {
+					gnupg, err := gpg.New(gpgPublicKey, gpgPrivateKey, gpgPrivateKeyPassphrase)
+					if err != nil {
+						return err
+					}
+					return decryptAction(c, crypto.New(gnupg))
 				},
 			},
 		},
