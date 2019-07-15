@@ -24,7 +24,7 @@ Provider        | Maturity
 AWS KMS         | `beta`
 Azure Key Vault | `beta`
 GCP KMS         | `alpha`
-GCP (GnuPG)     | `alpha`
+GPG (GnuPG)     | `alpha`
 
 ## Installation
 
