@@ -48,3 +48,16 @@ Also, you can set `GPG_PASSPHRASE` environment variable:
     export GPG_PASSPHRASE=<passphrase>
     crypt decrypt --private-key my-private-key.asc --in test.enc
     
+## Current limitations
+
+This section describes current limitations and planned fixes in the next releases. 
+
+### No support for keyring
+
+In the GnuPG 2.1 keyring format has changed, see [What’s new in GnuPG 2.1](https://www.gnupg.org/faq/whats-new-in-2.1.html) for more details.
+
+Use `--export-secret-keys` to export the secret keys , or `--export` to export your public keys.
+
+Upstream issues:
+- https://github.com/helm/helm/issues/2843#issuecomment-424926564
+- https://github.com/golang/go/issues/29082
