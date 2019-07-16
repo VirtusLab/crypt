@@ -20,7 +20,7 @@ func TestEncryptDecryptWithKeys(t *testing.T) {
 	defer privateKey.Close()
 	defer os.Remove(privateKey.Name())
 
-	gnupg, err := New(privateKey.Name(), privateKey.Name(), "")
+	gnupg, err := New(privateKey.Name(), privateKey.Name(), "", "", "")
 	require.NoError(t, err)
 
 	plaintext := "TOP SECRET"
@@ -31,6 +31,17 @@ func TestEncryptDecryptWithKeys(t *testing.T) {
 	require.NoError(t, err)
 
 	require.Equal(t, string(decrypted), plaintext)
+}
+
+func TestEncryptWithKeyServer(t *testing.T) {
+	keyServer := "keyserver.ubuntu.com"
+	keyID := "51716619E084DAB9"
+	gnupg, err := New("", "", "", keyID, keyServer)
+	require.NoError(t, err)
+
+	plaintext := "TOP SECRET"
+	_, err = gnupg.Encrypt([]byte(plaintext))
+	require.NoError(t, err)
 }
 
 const PublicKey = `

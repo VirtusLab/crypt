@@ -54,6 +54,10 @@ var (
 	gpgPrivateKey string
 	// GPG Private Key passphrase
 	gpgPrivateKeyPassphrase string
+	// GPG key server address
+	gpgKeyServer string
+	// GPG key id from the key server
+	gpgKeyID string
 )
 
 func main() {
@@ -271,9 +275,21 @@ func encrypt() cli.Command {
 						Usage:       "the public key path",
 						Destination: &gpgPublicKey, // FIXME #2 make this flag required
 					},
+					cli.StringFlag{
+						Name:        "key-id",
+						Value:       "",
+						Usage:       "the public key id from keyserver",
+						Destination: &gpgKeyID, // FIXME #2 make this flag required
+					},
+					cli.StringFlag{
+						Name:        "keyserver",
+						Value:       "",
+						Usage:       "the address of keyserver",
+						Destination: &gpgKeyServer, // FIXME #2 make this flag required
+					},
 				}...),
 				Action: func(c *cli.Context) error {
-					gnupg, err := gpg.New(gpgPublicKey, "", "")
+					gnupg, err := gpg.New(gpgPublicKey, "", "", gpgKeyID, gpgKeyServer)
 					if err != nil {
 						return err
 					}
@@ -494,7 +510,7 @@ func decrypt() cli.Command {
 					},
 				}...),
 				Action: func(c *cli.Context) error {
-					gnupg, err := gpg.New("", gpgPrivateKey, gpgPrivateKeyPassphrase)
+					gnupg, err := gpg.New("", gpgPrivateKey, gpgPrivateKeyPassphrase, "", "")
 					if err != nil {
 						return err
 					}

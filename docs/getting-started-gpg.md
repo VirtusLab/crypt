@@ -11,7 +11,7 @@ Generate a new GPG key pair:
 
     gpg --gen-key
 
-## Encryption using GPG Public Key
+## Encryption using local GPG Public Key
 
 Identify your public key by running:
 
@@ -25,7 +25,11 @@ Encrypt:
 
     echo test | crypt encrypt gpg --public-key my-public-key.gpg --out test.enc 
        
-## Decryption using GPG Private Key
+## Encryption using GPG Public Key from the Key Server
+
+    echo test | ./crypt enc gpg --keyserver keyserver.ubuntu.com --key-id 51716619E084DAB9 --out test.enc
+       
+## Decryption using local GPG Private Key
 
 Identify your public key by running:
 
