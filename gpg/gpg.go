@@ -35,7 +35,7 @@ func (p *GPG) Encrypt(plaintext []byte) ([]byte, error) {
 // Decrypt is responsible for decrypting ciphertext and returning plaintext in bytes using GPG (GnuPG).
 // See Crypt.Decrypt
 func (p *GPG) Decrypt(ciphertext []byte) ([]byte, error) {
-	return p.decryptWithKeys(ciphertext)
+	return p.decryptWithKey(ciphertext)
 }
 
 func (p *GPG) encryptWithKey(plaintext []byte) ([]byte, error) {
@@ -66,17 +66,23 @@ func (p *GPG) encryptWithKey(plaintext []byte) ([]byte, error) {
 	return encrypted, nil
 }
 
-func (p *GPG) decryptWithKeys(ciphertext []byte) ([]byte, error) {
+func (p *GPG) decryptWithKey(ciphertext []byte) ([]byte, error) {
 	privateKeyEntity, err := readEntity(p.PrivateKeyPath)
 	if err != nil {
 		return nil, err
 	}
 
-	if privateKeyEntity.PrivateKey != nil && privateKeyEntity.PrivateKey.Encrypted {
+	if privateKeyEntity.PrivateKey.Encrypted {
 		passphraseByte := []byte(p.Passphrase)
 		err = privateKeyEntity.PrivateKey.Decrypt(passphraseByte)
 		if err != nil {
 			return nil, err
+		}
+		for _, subkey := range privateKeyEntity.Subkeys {
+			err = subkey.PrivateKey.Decrypt(passphraseByte)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
