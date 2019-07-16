@@ -67,11 +67,6 @@ func (p *GPG) encryptWithKey(plaintext []byte) ([]byte, error) {
 }
 
 func (p *GPG) decryptWithKeys(ciphertext []byte) ([]byte, error) {
-	publicKeyEntity, err := readEntity(p.PublicKeyPath)
-	if err != nil {
-		return nil, err
-	}
-
 	privateKeyEntity, err := readEntity(p.PrivateKeyPath)
 	if err != nil {
 		return nil, err
@@ -85,7 +80,7 @@ func (p *GPG) decryptWithKeys(ciphertext []byte) ([]byte, error) {
 		}
 	}
 
-	entityList := openpgp.EntityList{privateKeyEntity, publicKeyEntity}
+	entityList := openpgp.EntityList{privateKeyEntity}
 	md, err := openpgp.ReadMessage(bytes.NewBuffer(ciphertext), entityList, nil, nil)
 	if err != nil {
 		return nil, err

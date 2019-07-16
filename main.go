@@ -486,12 +486,6 @@ func decrypt() cli.Command {
 						Destination: &gpgPrivateKeyPassphrase, // FIXME #2 make this flag required
 					},
 					cli.StringFlag{
-						Name:        "public-key",
-						Value:       "",
-						Usage:       "the public key path",
-						Destination: &gpgPublicKey, // FIXME #2 make this flag required
-					},
-					cli.StringFlag{
 						Name:        "private-key",
 						Value:       "",
 						Usage:       "the private key path",
@@ -499,7 +493,7 @@ func decrypt() cli.Command {
 					},
 				}...),
 				Action: func(c *cli.Context) error {
-					gnupg, err := gpg.New(gpgPublicKey, gpgPrivateKey, gpgPrivateKeyPassphrase)
+					gnupg, err := gpg.New("", gpgPrivateKey, gpgPrivateKeyPassphrase)
 					if err != nil {
 						return err
 					}
