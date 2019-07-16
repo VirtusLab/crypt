@@ -94,7 +94,7 @@ func (c *Client) GetKeysByID(ctx context.Context, keyID *KeyID) (openpgp.EntityL
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		return nil, KeyNotFoundError
 	}
-	if ct := resp.Header.Get("Content-Type"); strings.Index(strings.ToLower(ct), "application/pgp-keys") == -1 {
+	if ct := resp.Header.Get("Content-Type"); !strings.Contains(strings.ToLower(ct), "application/pgp-keys") {
 		return nil, UnexpectedContentTypeError
 	}
 	return openpgp.ReadArmoredKeyRing(resp.Body)
