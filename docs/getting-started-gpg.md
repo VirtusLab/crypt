@@ -38,3 +38,13 @@ Run this command to export your GPG Private Key (armored):
 Decrypt:
 
     crypt decrypt --private-key my-private-key.asc --in test.enc
+
+Decrypt with passphrase for the private key: 
+
+    crypt decrypt --private-key my-private-key.asc --passphrase <passphrase> --in test.enc
+
+Also, you can set `GPG_PASSPHRASE` environment variable:
+    
+    export GPG_PASSPHRASE=<passphrase>
+    crypt decrypt --private-key my-private-key.asc --in test.enc
+    

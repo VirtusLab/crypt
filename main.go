@@ -484,6 +484,7 @@ func decrypt() cli.Command {
 						Value:       "",
 						Usage:       "the passphrase key passphrase",
 						Destination: &gpgPrivateKeyPassphrase, // FIXME #2 make this flag required
+						EnvVar:      "GPG_PASSPHRASE",
 					},
 					cli.StringFlag{
 						Name:        "private-key",
