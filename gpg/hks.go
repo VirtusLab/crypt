@@ -8,6 +8,7 @@ import (
 	u "net/url"
 	"strings"
 
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/net/context/ctxhttp"
 )
@@ -48,30 +49,24 @@ type Client struct {
 // NewClient creates a new Client using the provided keyserver and http.Client.
 // If client is nil a new one will be created.
 // Panics if keyserver is nil.
-func NewClient(keyserver *Keyserver, client *http.Client) *Client {
+func NewClient(keyserver *Keyserver, client *http.Client) (*Client, error) {
 	if keyserver == nil {
-		panic("keyserver nil")
+		return nil, errors.New("keyserver is empty")
 	}
 	if keyserver.url == nil {
-		panic("keyserver url nil")
+		return nil, errors.New("keyserver url empty")
 	}
 	c := &Client{client: client, keyserver: keyserver}
 	if c.client == nil {
 		c.client = &http.Client{}
 	}
-	return c
+	return c, nil
 }
 
 // GetKeysByID requests keys from the keyserver that match the provided keyID.
 func (c *Client) GetKeysByID(ctx context.Context, keyID *KeyID) (openpgp.EntityList, error) {
-	if ctx == nil {
-		panic("context nil")
-	}
 	if keyID == nil {
-		panic("keyID nil")
-	}
-	if c.keyserver == nil {
-		panic("empty client")
+		return nil, errors.New("keyID is empty")
 	}
 	if c.client == nil {
 		c.client = &http.Client{}

@@ -2,11 +2,11 @@ package gpg
 
 import (
 	"bytes"
+	"context"
 	"io/ioutil"
 	"os"
 
-	"context"
-	"errors"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 	"golang.org/x/crypto/openpgp/packet"
@@ -53,28 +53,30 @@ func (p *GPG) Decrypt(ciphertext []byte) ([]byte, error) {
 func (p *GPG) encryptWithKeyServer(plaintext []byte) ([]byte, error) {
 	keyServer, err := ParseKeyserver(p.KeyServer)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to parse keyserver")
 	}
 	keyID, err := ParseKeyID(p.KeyID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to parse key")
 	}
-	client := NewClient(keyServer, nil)
+	client, err := NewClient(keyServer, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create keyserver client")
+	}
 	entities, err := client.GetKeysByID(context.TODO(), keyID)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to get key")
 	}
 	if len(entities) != 1 {
-		return nil, err
+		return nil, errors.Wrap(err, "more than one entry for the key")
 	}
-
 	return p.encrypt(plaintext, entities)
 }
 
 func (p *GPG) encryptWithKey(plaintext []byte) ([]byte, error) {
 	entity, err := readEntity(p.PublicKeyPath)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to read public key")
 	}
 
 	return p.encrypt(plaintext, openpgp.EntityList{entity})
@@ -84,11 +86,11 @@ func (p *GPG) encrypt(plaintext []byte, entities []*openpgp.Entity) ([]byte, err
 	buf := new(bytes.Buffer)
 	writer, err := openpgp.Encrypt(buf, entities, nil, nil, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to encrypt")
 	}
 	_, err = writer.Write(plaintext)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to write ciphertext")
 	}
 	err = writer.Close()
 	if err != nil {
@@ -106,19 +108,19 @@ func (p *GPG) encrypt(plaintext []byte, entities []*openpgp.Entity) ([]byte, err
 func (p *GPG) decryptWithKey(ciphertext []byte) ([]byte, error) {
 	privateKeyEntity, err := readEntity(p.PrivateKeyPath)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to read private key")
 	}
 
 	if privateKeyEntity.PrivateKey.Encrypted {
 		passphraseBytes := []byte(p.Passphrase)
 		err = privateKeyEntity.PrivateKey.Decrypt(passphraseBytes)
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "failed to decrypt private key")
 		}
 		for _, subkey := range privateKeyEntity.Subkeys {
 			err = subkey.PrivateKey.Decrypt(passphraseBytes)
 			if err != nil {
-				return nil, err
+				return nil, errors.Wrap(err, "failed to decrypt private key")
 			}
 		}
 	}
@@ -126,11 +128,11 @@ func (p *GPG) decryptWithKey(ciphertext []byte) ([]byte, error) {
 	entityList := openpgp.EntityList{privateKeyEntity}
 	md, err := openpgp.ReadMessage(bytes.NewBuffer(ciphertext), entityList, nil, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to decrypt")
 	}
 	decrypted, err := ioutil.ReadAll(md.UnverifiedBody)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "failed to read plaintext")
 	}
 
 	return decrypted, nil
