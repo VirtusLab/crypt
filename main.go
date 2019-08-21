@@ -15,7 +15,7 @@ import (
 	"github.com/VirtusLab/go-extended/pkg/files"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-	"gopkg.in/urfave/cli.v1"
+	"github.com/urfave/cli"
 )
 
 var (
@@ -345,7 +345,7 @@ func action(c *cli.Context, crypt crypto.Crypt, singleFileFunc, directoryFunc fu
 		return errors.New("conflict, --outdir can't be used with --in or --out")
 	}
 	err := singleFileFunc(crypt)
-	if err != nil && err == files.ErrExpectedStdin {
+	if err != nil && err == files.NewErrExpectedStdin() {
 		return errors.New("expected either stdin, --indir or --in parameter, for usage use --help")
 	}
 	return err

@@ -30,7 +30,7 @@
   unused-packages = true
 
 [[constraint]]
-  name = "gopkg.in/urfave/cli.v1"
+  name = "github.com/urfave/cli"
   version = "1.21.0"
 
 [[constraint]]
@@ -44,3 +44,7 @@
 [[constraint]]
   branch = "master"
   name = "golang.org/x/crypto"
+
+[[override]]
+  name = "github.com/Azure/go-autorest"
+  version = "13.0.0"
