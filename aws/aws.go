@@ -53,10 +53,11 @@ func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 		k.profile = DefaultProfile
 	}
 
-	// AWS_DEFAULT_PROFILE environment variable can be also used to set profile
+	// Environment variables can be also used, see: /vendor/github.com/aws/aws-sdk-go/aws/session/env_config.go
 	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
-		Profile: k.profile,
-		Config:  aws.Config{Region: aws.String(k.region)},
+		Config:            aws.Config{Region: aws.String(k.region)},
+		Profile:           k.profile,
+		SharedConfigState: session.SharedConfigEnable,
 	}))
 	svc := kms.New(awsSession, aws.NewConfig().WithRegion(k.region))
 	input := &kms.EncryptInput{
@@ -82,10 +83,11 @@ func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
 		k.profile = DefaultProfile
 	}
 
-	// AWS_DEFAULT_PROFILE environment variable can be also used to set profile
+	// Environment variables can be also used, see: /vendor/github.com/aws/aws-sdk-go/aws/session/env_config.go
 	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
-		Profile: k.profile,
-		Config:  aws.Config{Region: aws.String(k.region)},
+		Profile:           k.profile,
+		Config:            aws.Config{Region: aws.String(k.region)},
+		SharedConfigState: session.SharedConfigEnable,
 	}))
 	svc := kms.New(awsSession)
 	input := &kms.DecryptInput{
