@@ -2,16 +2,9 @@ package aws
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
-)
-
-const (
-	// DefaultProfile is the default profile to be used when loading configuration
-	// from the config files if another profile name is not provided.
-	DefaultProfile = session.DefaultSharedConfigProfile
 )
 
 var (
@@ -48,18 +41,16 @@ func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 		return nil, errors.Wrapf(ErrRegionMissing, "error reading region: %v", k.region)
 	}
 
-	if len(k.profile) == 0 {
+	if k.profile == DefaultProfile {
 		logrus.Debug("Using default AWS API credentials profile")
-		k.profile = DefaultProfile
 	}
 
-	// Environment variables can be also used, see: /vendor/github.com/aws/aws-sdk-go/aws/session/env_config.go
-	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
-		Config:            aws.Config{Region: aws.String(k.region)},
-		Profile:           k.profile,
-		SharedConfigState: session.SharedConfigEnable,
-	}))
-	svc := kms.New(awsSession, aws.NewConfig().WithRegion(k.region))
+	awsSession, awsConfig, err := SessionConfig(k.region, k.profile)
+	if err != nil {
+		return nil, err
+	}
+
+	svc := kms.New(awsSession, awsConfig)
 	input := &kms.EncryptInput{
 		Plaintext: plaintext,
 		KeyId:     aws.String(k.key),
@@ -68,7 +59,7 @@ func (k *KMS) Encrypt(plaintext []byte) ([]byte, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-	return []byte(output.CiphertextBlob), nil
+	return output.CiphertextBlob, nil
 }
 
 // Decrypt is responsible for decrypting ciphertext and returning plaintext in bytes using AWS KMS.
@@ -78,17 +69,15 @@ func (k *KMS) Decrypt(ciphertext []byte) ([]byte, error) {
 		return nil, errors.Wrapf(ErrRegionMissing, "error reading region: %v", k.region)
 	}
 
-	if len(k.profile) == 0 {
+	if k.profile == DefaultProfile {
 		logrus.Debug("Using default AWS API credentials profile")
-		k.profile = DefaultProfile
 	}
 
-	// Environment variables can be also used, see: /vendor/github.com/aws/aws-sdk-go/aws/session/env_config.go
-	awsSession := session.Must(session.NewSessionWithOptions(session.Options{
-		Profile:           k.profile,
-		Config:            aws.Config{Region: aws.String(k.region)},
-		SharedConfigState: session.SharedConfigEnable,
-	}))
+	awsSession, _, err := SessionConfig(k.region, k.profile)
+	if err != nil {
+		return nil, err
+	}
+
 	svc := kms.New(awsSession)
 	input := &kms.DecryptInput{
 		CiphertextBlob: ciphertext,
