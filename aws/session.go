@@ -12,6 +12,7 @@ const (
 	DefaultProfile = session.DefaultSharedConfigProfile
 )
 
+// SessionConfig returns AWS API client session and config with given region and profile
 func SessionConfig(region, profile string) (*session.Session, *aws.Config, error) {
 	// Environment variables can be also used, see: /vendor/github.com/aws/aws-sdk-go/aws/session/env_config.go
 	config := aws.NewConfig().
