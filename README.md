@@ -1,6 +1,6 @@
 # crypt
 
-[![Version](https://img.shields.io/badge/version-v0.2.4-brightgreen.svg)](https://github.com/VirtusLab/crypt/releases/tag/v0.2.4)
+[![Version](https://img.shields.io/badge/version-v0.2.5-brightgreen.svg)](https://github.com/VirtusLab/crypt/releases/tag/v0.2.5)
 [![Travis CI](https://img.shields.io/travis/VirtusLab/crypt.svg)](https://travis-ci.org/VirtusLab/crypt)
 [![Github All Releases](https://img.shields.io/github/downloads/VirtusLab/crypt/total.svg)](https://github.com/VirtusLab/crypt/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/VirtusLab/crypt "Go Report Card")](https://goreportcard.com/report/github.com/VirtusLab/crypt)
@@ -34,15 +34,15 @@ Downloading binaries with `bash`:
 
     OS=$(uname -s | tr '[A-Z]' '[a-z]')
     ARCH=amd64
-    curl -SLf# -o ${HOME}/bin/crypt https://github.com/VirtusLab/crypt/releases/download/v0.2.4/crypt-${OS}-${ARCH}
+    curl -SLf# -o ${HOME}/bin/crypt https://github.com/VirtusLab/crypt/releases/download/v0.2.5/crypt-${OS}-${ARCH}
     chmod +x ${HOME}/bin/crypt
     crypt --version
 
 Popular links:
 
-- [Mac OS 64 bit](https://github.com/VirtusLab/crypt/releases/download/v0.2.4/crypt-darwin-amd64)
-- [Linux 64 bit](https://github.com/VirtusLab/crypt/releases/download/v0.2.4/crypt-linux-amd64)
-- [Windows 64 bit](https://github.com/VirtusLab/crypt/releases/download/v0.2.4/crypt-windows-amd64)
+- [Mac OS 64 bit](https://github.com/VirtusLab/crypt/releases/download/v0.2.5/crypt-darwin-amd64)
+- [Linux 64 bit](https://github.com/VirtusLab/crypt/releases/download/v0.2.5/crypt-linux-amd64)
+- [Windows 64 bit](https://github.com/VirtusLab/crypt/releases/download/v0.2.5/crypt-windows-amd64)
 
 For more binaries please **visit the [Releases Page](https://github.com/VirtusLab/crypt/releases)**.
 
@@ -64,7 +64,7 @@ For more binaries please **visit the [Releases Page](https://github.com/VirtusLa
        crypt [global options] command [command options] [arguments...]
 
     VERSION:
-       v0.2.4
+       v0.2.5
 
     AUTHOR:
        VirtusLab
