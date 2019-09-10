@@ -408,6 +408,7 @@
     "github.com/Azure/azure-sdk-for-go/services/keyvault/auth",
     "github.com/Azure/go-autorest/autorest",
     "github.com/VirtusLab/go-extended/pkg/cli",
+    "github.com/VirtusLab/go-extended/pkg/errors",
     "github.com/VirtusLab/go-extended/pkg/files",
     "github.com/aws/aws-sdk-go/aws",
     "github.com/aws/aws-sdk-go/aws/session",
