@@ -26,3 +26,6 @@ cross
 
 # Dependencies
 vendor
+
+# Go Modules
+go.sum
