@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/pkg/errors"
-	"google.golang.org/api/cloudkms/v1"
+	cloudkms "google.golang.org/api/cloudkms/v1"
 )
 
 var (
