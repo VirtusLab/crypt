@@ -173,7 +173,7 @@ release: $(wildcard *.go) $(wildcard */*.go) VERSION.txt ## Builds the cross-com
 	$(foreach GOOSARCH,$(GOOSARCHES), $(call buildrelease,$(subst /,,$(dir $(GOOSARCH))),$(notdir $(GOOSARCH))))
 
 .PHONY: verify
-verify: fmt vet goimports test ## Runs a fmt, lint, vet, goimports and test
+verify: fmt vet goimports test ## Runs a fmt, vet, goimports and test
 
 .PHONY: cover
 cover: ## Runs go test with coverage
