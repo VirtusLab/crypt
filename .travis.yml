@@ -1,7 +1,7 @@
 language: go
 sudo: false
 go:
-- 1.14.x
+- 1.18.x
 matrix:
   fast_finish: true
 
@@ -27,9 +27,9 @@ deploy:
   - cross/crypt-darwin-amd64
   - cross/crypt-darwin-amd64.md5
   - cross/crypt-darwin-amd64.sha256
-  - cross/crypt-darwin-386
-  - cross/crypt-darwin-386.md5
-  - cross/crypt-darwin-386.sha256
+  - cross/crypt-darwin-arm64
+  - cross/crypt-darwin-arm64.md5
+  - cross/crypt-darwin-arm64.sha256
   - cross/crypt-freebsd-amd64
   - cross/crypt-freebsd-amd64.md5
   - cross/crypt-freebsd-amd64.sha256
