@@ -7,11 +7,8 @@ go:
 matrix:
   fast_finish: true
 
-before_install:
-- make init
-
 script:
-- make status verify
+- make status build fmt vet test
 
 before_deploy:
 - make status release
