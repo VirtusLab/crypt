@@ -64,9 +64,8 @@ all: clean verify build install ## Test, build, install
 	@echo "+ $@"
 
 .PHONY: init
-init: ## Initializes go tools this Makefile uses: golint, staticcheck, goimports, checkmake
+init: ## Initializes go tools this Makefile uses: goimports, checkmake
 	@echo "+ $@"
-	go get -u golang.org/x/lint/golint
 	go get -u golang.org/x/tools/cmd/goimports
 	go get -u github.com/mrtazz/checkmake
 	@echo "Initialized tools"
@@ -90,11 +89,6 @@ static: ## Builds a static executable
 fmt: ## Verifies all files have been `gofmt`ed
 	@echo "+ $@"
 	@go fmt $(PACKAGES)
-
-.PHONY: lint
-lint: ## Verifies `golint` passes
-	@echo "+ $@"
-	@golint -set_exit_status $(PACKAGES)
 
 .PHONY: goimports
 goimports: ## Verifies `goimports` passes
@@ -134,11 +128,6 @@ e2e: build ## Runs the e2e tests
 vet: ## Verifies `go vet` passes
 	@echo "+ $@"
 	@go vet $(PACKAGES)
-
-.PHONY: staticcheck
-staticcheck: ## Verifies `staticcheck` passes
-	@echo "+ $@"
-	@staticcheck $(PACKAGES)
 
 .PHONY: install
 install: ## Installs the executable
@@ -184,7 +173,7 @@ release: $(wildcard *.go) $(wildcard */*.go) VERSION.txt ## Builds the cross-com
 	$(foreach GOOSARCH,$(GOOSARCHES), $(call buildrelease,$(subst /,,$(dir $(GOOSARCH))),$(notdir $(GOOSARCH))))
 
 .PHONY: verify
-verify: fmt lint vet goimports test ## Runs a fmt, lint, vet, goimports and test
+verify: fmt vet goimports test ## Runs a fmt, lint, vet, goimports and test
 
 .PHONY: cover
 cover: ## Runs go test with coverage
