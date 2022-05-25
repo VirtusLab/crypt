@@ -7,10 +7,10 @@ matrix:
 
 before_install:
 - make init
+- go mod vendor
 
 script:
 - make verify
-- go mod vendor
 
 before_deploy:
 - make release
