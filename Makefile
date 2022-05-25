@@ -63,13 +63,6 @@ ARGS ?= $(EXTRA_ARGS)
 all: clean verify build install ## Test, build, install
 	@echo "+ $@"
 
-.PHONY: init
-init: ## Initializes go tools this Makefile uses: goimports, checkmake
-	@echo "+ $@"
-	go get -u golang.org/x/tools/cmd/goimports
-	go get -u github.com/mrtazz/checkmake
-	@echo "Initialized tools"
-
 .PHONY: build
 build: $(NAME) ## Builds a dynamic executable or package
 	@echo "+ $@"
@@ -89,11 +82,6 @@ static: ## Builds a static executable
 fmt: ## Verifies all files have been `gofmt`ed
 	@echo "+ $@"
 	@go fmt $(PACKAGES)
-
-.PHONY: goimports
-goimports: ## Verifies `goimports` passes
-	@echo "+ $@"
-	@goimports -l -e $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 
 .PHONY: test
 test: ## Runs the go tests
@@ -173,7 +161,7 @@ release: $(wildcard *.go) $(wildcard */*.go) VERSION.txt ## Builds the cross-com
 	$(foreach GOOSARCH,$(GOOSARCHES), $(call buildrelease,$(subst /,,$(dir $(GOOSARCH))),$(notdir $(GOOSARCH))))
 
 .PHONY: verify
-verify: fmt vet goimports test ## Runs a fmt, vet, goimports and test
+verify: fmt vet test ## Runs a fmt, vet and test
 
 .PHONY: cover
 cover: ## Runs go test with coverage
