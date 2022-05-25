@@ -1,19 +1,20 @@
 language: go
 sudo: false
+
 go:
 - 1.18.x
+
 matrix:
   fast_finish: true
 
 before_install:
 - make init
-#- go mod vendor
 
 script:
-- make verify
+- make status verify
 
 before_deploy:
-- make release
+- make status release
 - echo "Deploying to GitHub releases ..."
 
 deploy:
@@ -56,6 +57,7 @@ deploy:
   - cross/crypt-windows-386.md5
   - cross/crypt-windows-386.sha256
 
-#cache:
-#  directories:
-#    - vendor
+cache:
+  directories:
+    - $HOME/.cache/go-build
+    - $GOPATH/pkg/mod
