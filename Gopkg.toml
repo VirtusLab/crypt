@@ -45,10 +45,6 @@
   branch = "master"
   name = "golang.org/x/crypto"
 
-[[constraint]]
-  branch = "master"
-  name = "golang.org/x/sys"
-
 [[override]]
   name = "github.com/Azure/go-autorest"
   version = "13.0.0"
