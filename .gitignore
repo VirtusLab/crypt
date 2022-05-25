@@ -24,9 +24,3 @@ cross
 
 # IDE
 .idea
-
-# Dependencies
-vendor
-
-# Go Modules
-go.sum
