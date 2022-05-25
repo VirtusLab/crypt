@@ -7,7 +7,7 @@ matrix:
 
 before_install:
 - make init
-- go mod vendor
+#- go mod vendor
 
 script:
 - make verify
@@ -56,6 +56,6 @@ deploy:
   - cross/crypt-windows-386.md5
   - cross/crypt-windows-386.sha256
 
-cache:
-  directories:
-    - vendor
+#cache:
+#  directories:
+#    - vendor
