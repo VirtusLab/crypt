@@ -231,6 +231,3 @@ ifneq ($(GITIGNOREDBUTTRACKEDCHANGES),)
 	@git ls-files -c -i --exclude-standard
 	@echo
 endif
-	@echo "Dependencies:"
-	@go list -m all
-	@echo
