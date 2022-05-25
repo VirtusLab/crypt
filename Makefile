@@ -29,7 +29,7 @@ BUILDDIR := ${PREFIX}/cross
 VERSION := $(shell cat VERSION.txt)
 GITCOMMIT := $(shell git rev-parse --short HEAD)
 GITUNTRACKEDCHANGES := $(shell git status --porcelain --untracked-files=no)
-GITIGNOREDBUTTRACKEDCHANGES := $(shell git ls-files -i --exclude-standard)
+GITIGNOREDBUTTRACKEDCHANGES := $(shell git ls-files -c -i --exclude-standard)
 ifneq ($(GITUNTRACKEDCHANGES),)
     GITCOMMIT := $(GITCOMMIT)-dirty
 endif
@@ -51,7 +51,7 @@ GO_LDFLAGS=-ldflags "-w $(CTIMEVAR)"
 GO_LDFLAGS_STATIC=-ldflags "-w $(CTIMEVAR) -extldflags -static"
 
 # List the GOOS and GOARCH to build
-GOOSARCHES = darwin/amd64 darwin/386 darwin/arm64 freebsd/amd64 freebsd/386 linux/arm linux/arm64 linux/amd64 linux/386 windows/amd64 windows/386
+GOOSARCHES = darwin/amd64 darwin/arm64 freebsd/amd64 freebsd/386 linux/arm linux/arm64 linux/amd64 linux/386 windows/amd64 windows/386
 
 PACKAGES = $(shell go list -f '{{.ImportPath}}/' ./... | grep -v vendor)
 
@@ -60,34 +60,16 @@ ARGS ?= $(EXTRA_ARGS)
 .DEFAULT_GOAL := help
 
 .PHONY: all
-all: clean dependencies verify build install ## Test, build, install
+all: clean verify build install ## Test, build, install
 	@echo "+ $@"
 
 .PHONY: init
-HAS_GOLINT := $(shell which golint)
-HAS_GOIMPORTS := $(shell which goimports)
-HAS_CHECKMAKE := $(shell which checkmake)
-HAS_STATICCHECK := $(shell which staticcheck)
-init: ## Initializes this Makefile dependencies: golint, staticcheck, checkmake
+init: ## Initializes go tools this Makefile uses: golint, staticcheck, goimports, checkmake
 	@echo "+ $@"
-ifndef HAS_GOLINT
 	go get -u golang.org/x/lint/golint
-endif
-ifndef HAS_STATICCHECK
-	go get -u honnef.co/go/tools/cmd/staticcheck
-endif
-ifndef HAS_GOIMPORTS
 	go get -u golang.org/x/tools/cmd/goimports
-endif
-ifndef HAS_CHECKMAKE
 	go get -u github.com/mrtazz/checkmake
-endif
-	@echo "Initialized dependencies"
-
-.PHONY: dependencies
-dependencies: ## Populates the vendor directory with dependencies
-	@echo "+ $@"
-	go mod vendor -v
+	@echo "Initialized tools"
 
 .PHONY: build
 build: $(NAME) ## Builds a dynamic executable or package
@@ -190,6 +172,10 @@ GOOS=$(1) GOARCH=$(2) CGO_ENABLED=0 go build \
 	 -installsuffix netgo ${GO_LDFLAGS_STATIC} $(BUILD_PATH);
 md5sum $(BUILDDIR)/$(NAME)-$(1)-$(2) > $(BUILDDIR)/$(NAME)-$(1)-$(2).md5;
 sha256sum $(BUILDDIR)/$(NAME)-$(1)-$(2) > $(BUILDDIR)/$(NAME)-$(1)-$(2).sha256;
+mkdir -p $(BUILDDIR)/$(1)-$(2);
+cp ${PREFIX}/LICENSE $(BUILDDIR)/$(1)-$(2);
+cp $(BUILDDIR)/$(NAME)-$(1)-$(2) $(BUILDDIR)/$(1)-$(2)/$(NAME);
+tar cvzf $(BUILDDIR)/$(NAME)-$(1)-$(2).tar.gz -C $(BUILDDIR) $(1)-$(2);
 endef
 
 .PHONY: release
@@ -198,7 +184,7 @@ release: $(wildcard *.go) $(wildcard */*.go) VERSION.txt ## Builds the cross-com
 	$(foreach GOOSARCH,$(GOOSARCHES), $(call buildrelease,$(subst /,,$(dir $(GOOSARCH))),$(notdir $(GOOSARCH))))
 
 .PHONY: verify
-verify: fmt lint vet staticcheck goimports test ## Runs a fmt, lint, vet, staticcheck, goimports and test
+verify: fmt lint vet goimports test ## Runs a fmt, lint, vet, goimports and test
 
 .PHONY: cover
 cover: ## Runs go test with coverage
@@ -228,7 +214,7 @@ spring-clean: ## Cleanup git ignored files (interactive)
 BUMP := patch
 bump-version: ## Bump the version in the version file. Set BUMP to [ patch | major | minor ]
 	@echo "+ $@"
-	go get -u github.com/jessfraz/junk/sembump # update sembump tool
+#	go get -u github.com/jessfraz/junk/sembump # update sembump tool
 	$(eval NEW_VERSION=$(shell sembump --kind $(BUMP) $(VERSION)))
 	@echo "Bumping VERSION.txt from $(VERSION) to $(NEW_VERSION)"
 	@echo $(NEW_VERSION) > VERSION.txt
@@ -241,7 +227,7 @@ bump-version: ## Bump the version in the version file. Set BUMP to [ patch | maj
 .PHONY: tag
 tag: ## Create a new git tag to prepare to build a release
 	@echo "+ $@"
-	git tag -s -a $(VERSION) -m "$(VERSION)"
+	git tag -a $(VERSION) -m "$(VERSION)"
 	git push origin $(VERSION)
 
 .PHONY: help
@@ -265,9 +251,9 @@ ifneq ($(GITUNTRACKEDCHANGES),)
 endif
 ifneq ($(GITIGNOREDBUTTRACKEDCHANGES),)
 	@echo "Ignored but tracked files:"
-	@git ls-files -i --exclude-standard
+	@git ls-files -c -i --exclude-standard
 	@echo
 endif
 	@echo "Dependencies:"
-	@dep status
+	@go list -m all
 	@echo
