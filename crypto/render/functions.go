@@ -17,7 +17,6 @@ TemplateFunctions provides template functions for render or the standard (text/t
   - decryptGCP - decrypts the data from inside of the template using GCP KMS, for best results use with ungzip and b64dec
   - encryptAzure - encrypts the data from inside of the template using Azure Key Vault, for best results use with gzip and b64enc
   - decryptAzure - decrypts the data from inside of the template using Azure Key Vault, for best results use with ungzip and b64dec
-
 */
 func TemplateFunctions() template.FuncMap {
 	return template.FuncMap{

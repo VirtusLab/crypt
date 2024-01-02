@@ -5,13 +5,15 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
+	"log"
 
 	"github.com/VirtusLab/crypt/version"
 
-	"github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault"
-	"github.com/Azure/azure-sdk-for-go/services/keyvault/2016-10-01/keyvault/keyvaultapi"
-	"github.com/Azure/azure-sdk-for-go/services/keyvault/auth"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
+	"github.com/Azure/azure-sdk-for-go/sdk/keyvault/azkeys"
+
 	"github.com/pkg/errors"
+
 	"github.com/sirupsen/logrus"
 )
 
@@ -44,31 +46,36 @@ type KeyVault struct {
 	vaultURL   string
 	key        string
 	keyVersion string
-	client     keyvaultapi.BaseClientAPI
+	client     KeyVaultClient
 }
 
-// New creates Azure Key Vault KeyVault
+// KeyVaultClient interface represents Azure Key Vault client for encrypting and decrypting data
+type KeyVaultClient interface {
+	Encrypt(ctx context.Context, name string, version string, parameters azkeys.KeyOperationsParameters, options *azkeys.EncryptOptions) (azkeys.EncryptResponse, error)
+	Decrypt(ctx context.Context, name string, version string, parameters azkeys.KeyOperationsParameters, options *azkeys.DecryptOptions) (azkeys.DecryptResponse, error)
+}
+
+// New creates Azure Key Vault KeyVault using chained token credential
 func New(vaultURL, key, keyVersion string) (*KeyVault, error) {
-	client, err := newKeyVaultClient()
+	azCreds, err := azidentity.NewDefaultAzureCredential(nil)
+	if err != nil {
+		log.Fatalf("failed to obtain a credential: %v", err)
+	}
+
 	if err != nil {
 		return nil, err // err already wrapped in newKeyVaultClient function
 	}
+	keyVaultClient, err := azkeys.NewClient(vaultURL, azCreds, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	return &KeyVault{
-		client:     client,
+		client:     keyVaultClient,
 		vaultURL:   vaultURL,
 		key:        key,
 		keyVersion: keyVersion,
 	}, nil
-}
-
-func newKeyVaultClient() (keyvaultapi.BaseClientAPI, error) {
-	var err error
-	vaultClient := keyvault.New()
-	vaultClient.Authorizer, err = auth.NewAuthorizerFromCLI()
-	if err != nil {
-		return vaultClient, errors.Wrap(err, "failed to create Azure Authorizer")
-	}
-	return vaultClient, nil
 }
 
 // Encrypt encrypts plaintext using Azure Key Vault and returns ciphertext
@@ -83,14 +90,12 @@ func (k *KeyVault) encrypt(plaintext []byte, includeHeader bool) ([]byte, error)
 		return nil, err // err already wrapped in validate function
 	}
 
-	data := base64.RawURLEncoding.EncodeToString(plaintext)
-	p := keyvault.KeyOperationsParameters{Value: &data, Algorithm: keyvault.RSAOAEP256}
-
-	res, err := k.client.Encrypt(context.Background(), k.vaultURL, k.key, k.keyVersion, p)
+	alg := azkeys.JSONWebKeyEncryptionAlgorithmRSAOAEP256
+	p := azkeys.KeyOperationsParameters{Value: plaintext, Algorithm: &alg}
+	res, err := k.client.Encrypt(context.Background(), k.key, k.keyVersion, p, nil)
 	if err != nil {
-		return nil, errors.WithStack(err)
+		return nil, errors.Wrap(err, "error with decoding data")
 	}
-
 	if includeHeader {
 		metadata := MetadataHeader{
 			Provider:                providerName,
@@ -113,10 +118,12 @@ func (k *KeyVault) encrypt(plaintext []byte, includeHeader bool) ([]byte, error)
 			"keyVersion":  k.keyVersion,
 		}).Info("Encryption succeeded")
 		result := append(metadataURLEncoded, encryptedFileMetadataSeparator)
-		result = append(result, []byte(*res.Result)...)
+		result = append(result, res.Result...)
+
 		return result, nil
 	}
-	result, err := base64.RawURLEncoding.DecodeString(*res.Result)
+
+	result, err := base64.RawURLEncoding.DecodeString(string(res.Result[:]))
 	if err != nil {
 		return nil, errors.Wrap(err, "error with decoding data")
 	}
@@ -157,17 +164,15 @@ func (k *KeyVault) Decrypt(ciphertext []byte) ([]byte, error) {
 		k.keyVersion = metadata.AzureKeyVaultKeyVersion
 	}
 
-	p := keyvault.KeyOperationsParameters{Value: &dataToDecrypt, Algorithm: keyvault.RSAOAEP256}
+	var plaintext []byte
 
-	res, err := k.client.Decrypt(context.Background(), k.vaultURL, k.key, k.keyVersion, p)
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	plaintext, err := base64.RawURLEncoding.DecodeString(*res.Result)
+	alg := azkeys.JSONWebKeyEncryptionAlgorithmRSAOAEP256
+	p := azkeys.KeyOperationsParameters{Value: []byte(dataToDecrypt), Algorithm: &alg}
+	res, err := k.client.Decrypt(context.Background(), k.key, k.keyVersion, p, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error with decoding data")
 	}
+	plaintext = res.Result
 
 	logrus.WithFields(logrus.Fields{
 		"keyVaultURL": k.vaultURL,
