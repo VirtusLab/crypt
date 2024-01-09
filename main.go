@@ -220,7 +220,7 @@ func encrypt() cli.Command {
 					},
 					cli.StringFlag{
 						Name:        "profile",
-						Value:       aws.DefaultProfile,
+						Value:       "",
 						Usage:       "the AWS API credentials profile",
 						Destination: &awsProfile,
 					},
@@ -458,7 +458,7 @@ func decrypt() cli.Command {
 					},
 					cli.StringFlag{
 						Name:        "profile",
-						Value:       aws.DefaultProfile,
+						Value:       "",
 						Usage:       "the AWS API credentials profile",
 						Destination: &awsProfile,
 					},
