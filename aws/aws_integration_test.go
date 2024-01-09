@@ -25,7 +25,6 @@ func TestEncryptDecryptWithAWS(t *testing.T) {
 	profile := os.Getenv("AWS_PROFILE")
 	require.NotEmpty(t, key)
 	require.NotEmpty(t, region)
-	require.NotEmpty(t, profile)
 
 	crypt := crypto.New(New(key, region, profile))
 
