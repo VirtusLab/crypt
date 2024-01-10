@@ -18,7 +18,7 @@ func TestEncryptedDataStructure(t *testing.T) {
 		vaultURL:   "https://key-vault-url.com",
 		key:        "key-vault-key",
 		keyVersion: "das87d8asgd",
-		client:     fake.KeyVaultAPIClient{},
+		client:     fake.FakeKeyVaultAPIClient{},
 	}
 	secret := "top secret token"
 
@@ -41,8 +41,7 @@ func TestEncryptedDataStructure(t *testing.T) {
 	assert.Equal(t, crypto.vaultURL, metadata.AzureKeyVaultURL)
 	assert.Equal(t, version.VERSION, metadata.CryptVersion)
 
-	dataToDecrypt := string(encrypted[indexOfSeparator+1:])
-	decrypted, err := base64.RawURLEncoding.DecodeString(string(dataToDecrypt))
+	decrypted := string(encrypted[indexOfSeparator+1:])
 	require.NoError(t, err, "encrypted data should be encoded with base64")
 	assert.Equal(t, secret, string(decrypted))
 }
